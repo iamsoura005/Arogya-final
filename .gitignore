@@ -20,6 +20,11 @@ build/
 *~
 .DS_Store
 
+# Backup files
+*.backup
+*.bak
+*.old
+
 # Vercel
 .vercel/
 .next/
