@@ -5,7 +5,6 @@ import LoginPage from './components/LoginPage';
 import Dashboard from './components/Dashboard';
 import ConsultationInterface from './components/ConsultationInterface';
 import BenchmarkingDashboard from './components/BenchmarkingDashboard/BenchmarkingDashboard';
-import ModelComparisonDashboard from './components/ModelComparison/ModelComparisonDashboard';
 import ModelComparisonDashboardV2 from './components/ModelComparison/ModelComparisonDashboardV2';
 import { AuthContext, User } from './context/AuthContext';
 
