@@ -11,8 +11,11 @@
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "@types/chart.js": "^2.9.41",
+    "@types/crypto-js": "^4.2.2",
     "axios": "^1.12.2",
     "chart.js": "^4.5.1",
+    "crypto-js": "^4.2.0",
+    "date-fns": "^4.1.0",
     "framer-motion": "^10.16.4",
     "html2canvas": "^1.4.1",
     "html2pdf.js": "^0.12.1",
