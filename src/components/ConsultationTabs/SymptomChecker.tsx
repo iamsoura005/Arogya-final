@@ -1,17 +1,38 @@
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ChevronRight, AlertCircle, Pill } from 'lucide-react';
-import { useState } from 'react';
+import { X, ChevronRight, AlertCircle, Pill, Activity, CheckCircle, Brain, Heart } from 'lucide-react';
 import { detectDiseases, getSymptomRecommendations } from '../../services/diseaseDatabase';
+import { 
+  analyzeBERTEmotionalContext, 
+  generateBERTEnhancedAdvice,
+  calculateRecommendationConfidence 
+} from '../../services/bertService';
 
 interface SymptomCheckerProps {
   onClose: () => void;
 }
 
-const SYMPTOM_OPTIONS = [
-  'Fever', 'Cough', 'Sore Throat', 'Headache', 'Body Ache', 'Fatigue',
-  'Nausea', 'Vomiting', 'Diarrhea', 'Rash', 'Itching', 'Chest Pain',
-  'Shortness of Breath', 'Dizziness', 'Loss of Appetite', 'Chills',
-  'Sweating', 'Congestion', 'Sneezing', 'Watery Eyes'
+const commonSymptoms = [
+  'Fever',
+  'Cough',
+  'Headache',
+  'Fatigue',
+  'Body Ache',
+  'Sore Throat',
+  'Nausea',
+  'Vomiting',
+  'Diarrhea',
+  'Shortness of Breath',
+  'Chest Pain',
+  'Loss of Appetite',
+  'Dizziness',
+  'Rash',
+  'Itching',
+  'Chills',
+  'Sneezing',
+  'Watery Eyes',
+  'Congestion',
+  'Severe Headache',
 ];
 
 export default function SymptomChecker({ onClose }: SymptomCheckerProps) {
@@ -19,6 +40,9 @@ export default function SymptomChecker({ onClose }: SymptomCheckerProps) {
   const [showResults, setShowResults] = useState(false);
   const [detectedDiseases, setDetectedDiseases] = useState<any[]>([]);
   const [recommendations, setRecommendations] = useState<any>(null);
+  const [bertAnalysis, setBertAnalysis] = useState<any>(null);
+  const [enhancedAdvice, setEnhancedAdvice] = useState<any>(null);
+  const [confidenceScore, setConfidenceScore] = useState<number>(0);
 
   const handleSymptomToggle = (symptom: string) => {
     if (selectedSymptoms.includes(symptom)) {
@@ -29,11 +53,24 @@ export default function SymptomChecker({ onClose }: SymptomCheckerProps) {
   };
 
   const handleAnalyze = () => {
+    // Traditional disease detection
     const diseases = detectDiseases(selectedSymptoms);
     setDetectedDiseases(diseases);
     
     const recs = getSymptomRecommendations(selectedSymptoms);
     setRecommendations(recs);
+    
+    // BERT-enhanced emotional and contextual analysis
+    const bertResult = analyzeBERTEmotionalContext({ symptoms: selectedSymptoms });
+    setBertAnalysis(bertResult);
+    
+    // Generate emotionally intelligent advice
+    const advice = generateBERTEnhancedAdvice(selectedSymptoms, diseases, bertResult);
+    setEnhancedAdvice(advice);
+    
+    // Calculate confidence score
+    const confidence = calculateRecommendationConfidence(selectedSymptoms, diseases);
+    setConfidenceScore(confidence);
     
     setShowResults(true);
   };
@@ -43,6 +80,9 @@ export default function SymptomChecker({ onClose }: SymptomCheckerProps) {
     setShowResults(false);
     setDetectedDiseases([]);
     setRecommendations(null);
+    setBertAnalysis(null);
+    setEnhancedAdvice(null);
+    setConfidenceScore(0);
   };
 
   return (
@@ -77,7 +117,7 @@ export default function SymptomChecker({ onClose }: SymptomCheckerProps) {
             <p className="text-sm text-gray-600 mb-4">Select all symptoms you're experiencing:</p>
             
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-6 max-h-72 overflow-y-auto p-2 bg-gray-50 rounded-lg">
-              {SYMPTOM_OPTIONS.map((symptom) => (
+              {commonSymptoms.map((symptom) => (
                 <motion.button
                   key={symptom}
                   whileHover={{ scale: 1.05 }}
@@ -141,6 +181,127 @@ export default function SymptomChecker({ onClose }: SymptomCheckerProps) {
                 <p className="text-sm text-teal-800">Unable to detect specific conditions. Please consult a healthcare professional.</p>
               )}
             </div>
+
+            {/* BERT Analysis - Emotional Intelligence Section */}
+            {bertAnalysis && (
+              <div className="mb-6 p-5 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg border-2 border-purple-300 shadow-sm">
+                <h4 className="font-bold text-purple-900 mb-3 flex items-center space-x-2">
+                  <Brain className="w-6 h-6 text-purple-600" />
+                  <span>AI-Powered Contextual Analysis</span>
+                </h4>
+                
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <div className="bg-white p-3 rounded-lg border border-purple-200">
+                    <p className="text-xs text-gray-600 mb-1">Emotional Tone</p>
+                    <p className={`font-semibold text-sm ${
+                      bertAnalysis.emotionalTone === 'urgent' ? 'text-red-600' :
+                      bertAnalysis.emotionalTone === 'anxious' ? 'text-orange-600' :
+                      bertAnalysis.emotionalTone === 'concerned' ? 'text-yellow-600' :
+                      'text-green-600'
+                    }`}>
+                      {bertAnalysis.emotionalTone.toUpperCase()}
+                    </p>
+                  </div>
+                  <div className="bg-white p-3 rounded-lg border border-purple-200">
+                    <p className="text-xs text-gray-600 mb-1">Urgency Level</p>
+                    <p className={`font-semibold text-sm ${
+                      bertAnalysis.urgencyLevel === 'immediate' ? 'text-red-600' :
+                      bertAnalysis.urgencyLevel === 'soon' ? 'text-orange-600' :
+                      bertAnalysis.urgencyLevel === 'routine' ? 'text-blue-600' :
+                      'text-green-600'
+                    }`}>
+                      {bertAnalysis.urgencyLevel.toUpperCase()}
+                    </p>
+                  </div>
+                  <div className="bg-white p-3 rounded-lg border border-purple-200">
+                    <p className="text-xs text-gray-600 mb-1">Severity Score</p>
+                    <div className="flex items-center space-x-2">
+                      <div className="flex-1 bg-gray-200 rounded-full h-2">
+                        <div 
+                          className={`h-2 rounded-full ${
+                            bertAnalysis.severityScore >= 8 ? 'bg-red-600' :
+                            bertAnalysis.severityScore >= 5 ? 'bg-orange-500' :
+                            bertAnalysis.severityScore >= 3 ? 'bg-yellow-500' :
+                            'bg-green-500'
+                          }`}
+                          style={{ width: `${bertAnalysis.severityScore * 10}%` }}
+                        />
+                      </div>
+                      <span className="font-semibold text-sm">{bertAnalysis.severityScore}/10</span>
+                    </div>
+                  </div>
+                  <div className="bg-white p-3 rounded-lg border border-purple-200">
+                    <p className="text-xs text-gray-600 mb-1">Confidence</p>
+                    <p className="font-semibold text-sm text-purple-600">{confidenceScore}%</p>
+                  </div>
+                </div>
+
+                {bertAnalysis.contextualInsights && bertAnalysis.contextualInsights.length > 0 && (
+                  <div className="bg-white p-3 rounded-lg border border-purple-200 mb-3">
+                    <p className="text-xs font-semibold text-gray-700 mb-2">Contextual Insights:</p>
+                    <ul className="space-y-1">
+                      {bertAnalysis.contextualInsights.map((insight: string, idx: number) => (
+                        <li key={idx} className="text-xs text-gray-700 flex items-start space-x-2">
+                          <CheckCircle className="w-3 h-3 text-purple-600 mt-0.5 flex-shrink-0" />
+                          <span>{insight}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Emotionally Intelligent Advice Section */}
+            {enhancedAdvice && (
+              <div className="mb-6 p-5 bg-gradient-to-r from-pink-50 to-rose-50 rounded-lg border-2 border-pink-300 shadow-sm">
+                <h4 className="font-bold text-pink-900 mb-3 flex items-center space-x-2">
+                  <Heart className="w-6 h-6 text-pink-600" />
+                  <span>Personalized Guidance</span>
+                </h4>
+                
+                <div className="space-y-3">
+                  <div className="bg-white p-3 rounded-lg border border-pink-200">
+                    <p className="text-sm text-gray-800 leading-relaxed">{enhancedAdvice.introduction}</p>
+                  </div>
+                  
+                  <div className="bg-white p-3 rounded-lg border border-pink-200">
+                    <p className="text-xs font-semibold text-gray-700 mb-2">Emotional Support:</p>
+                    <p className="text-sm text-gray-800 leading-relaxed">{enhancedAdvice.emotionalSupport}</p>
+                  </div>
+
+                  <div className="bg-white p-3 rounded-lg border border-pink-200">
+                    <p className="text-xs font-semibold text-gray-700 mb-2">Recommended Actions:</p>
+                    <ul className="space-y-1">
+                      {enhancedAdvice.actionSteps.map((step: string, idx: number) => (
+                        <li key={idx} className="text-sm text-gray-800 flex items-start space-x-2">
+                          <span className="text-pink-600 font-bold mt-0.5">•</span>
+                          <span>{step}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="bg-white p-3 rounded-lg border border-pink-200">
+                    <p className="text-xs font-semibold text-gray-700 mb-2">Monitoring:</p>
+                    <p className="text-sm text-gray-800 leading-relaxed">{enhancedAdvice.monitoringAdvice}</p>
+                  </div>
+
+                  <div className="bg-gradient-to-r from-pink-100 to-rose-100 p-3 rounded-lg border-2 border-pink-300">
+                    <p className="text-sm font-medium text-pink-900 leading-relaxed">{enhancedAdvice.reassurance}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* AI Response Message */}
+            {bertAnalysis && (
+              <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-200">
+                <p className="text-sm text-blue-900 leading-relaxed italic">
+                  {bertAnalysis.recommendedResponse}
+                </p>
+              </div>
+            )}
 
             {detectedDiseases.length > 0 && detectedDiseases[0].medicines && (
               <div className="mb-6 p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200">
