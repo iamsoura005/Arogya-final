@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { LogOut, Plus, Calendar, FileText, MessageSquare, Mic, Image, AlertCircle, TrendingUp, Download, BarChart3, Activity, Pill } from 'lucide-react';
+import { LogOut, Plus, Calendar, FileText, MessageSquare, Mic, Image, AlertCircle, TrendingUp, Download, BarChart3, Activity, Pill, AlertTriangle, Shield, Sparkles, Smartphone, Beaker, Users } from 'lucide-react';
 import { useState } from 'react';
 import PrescriptionModal from './PrescriptionModal';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -14,9 +14,16 @@ interface DashboardProps {
   onViewPersonalDashboard?: () => void;
   onViewAppointments?: () => void;
   onViewMedications?: () => void;
+  onViewEmergency?: () => void;
+  onViewCompliance?: () => void;
+  onViewHealthCards?: () => void;
+  onViewExport?: () => void;
+  onViewAnalytics?: () => void;
+  onViewLabReports?: () => void;
+  onViewFamilyHub?: () => void;
 }
 
-export default function Dashboard({ user, consultations, onLogout, onStartConsultation, onViewBenchmarking, onViewModelComparison, onViewPersonalDashboard, onViewAppointments, onViewMedications }: DashboardProps) {
+export default function Dashboard({ user, consultations, onLogout, onStartConsultation, onViewBenchmarking, onViewModelComparison, onViewPersonalDashboard, onViewAppointments, onViewMedications, onViewEmergency, onViewCompliance, onViewHealthCards, onViewExport, onViewAnalytics, onViewLabReports, onViewFamilyHub }: DashboardProps) {
   const { t } = useLanguage();
   const [showPrescription, setShowPrescription] = useState(false);
 
@@ -210,6 +217,92 @@ export default function Dashboard({ user, consultations, onLogout, onStartConsul
             >
               <Pill className="w-5 h-5" />
               <span>{t.dashboard.trackMedications}</span>
+            </motion.button>
+          )}
+          
+          {/* New Advanced Features */}
+          {onViewEmergency && (
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={onViewEmergency}
+              className="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors flex items-center justify-center space-x-2"
+            >
+              <AlertTriangle className="w-5 h-5" />
+              <span>Emergency Response</span>
+            </motion.button>
+          )}
+          
+          {onViewCompliance && (
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={onViewCompliance}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors flex items-center justify-center space-x-2"
+            >
+              <Shield className="w-5 h-5" />
+              <span>Privacy & Compliance</span>
+            </motion.button>
+          )}
+          
+          {onViewHealthCards && (
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={onViewHealthCards}
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors flex items-center justify-center space-x-2"
+            >
+              <Sparkles className="w-5 h-5" />
+              <span>Health Card Generator</span>
+            </motion.button>
+          )}
+          
+          {onViewExport && (
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={onViewExport}
+              className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors flex items-center justify-center space-x-2"
+            >
+              <Smartphone className="w-5 h-5" />
+              <span>Export & Sync</span>
+            </motion.button>
+          )}
+          
+          {onViewAnalytics && (
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={onViewAnalytics}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors flex items-center justify-center space-x-2"
+            >
+              <TrendingUp className="w-5 h-5" />
+              <span>Health Analytics</span>
+            </motion.button>
+          )}
+          
+          {/* NEW: Game-Changing Features */}
+          {onViewLabReports && (
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={onViewLabReports}
+              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors flex items-center justify-center space-x-2"
+            >
+              <Beaker className="w-5 h-5" />
+              <span>🔬 Lab Report AI Analyzer</span>
+            </motion.button>
+          )}
+          
+          {onViewFamilyHub && (
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={onViewFamilyHub}
+              className="bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors flex items-center justify-center space-x-2"
+            >
+              <Users className="w-5 h-5" />
+              <span>👨‍👩‍👧‍👦 Family Health Hub</span>
             </motion.button>
           )}
           

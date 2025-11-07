@@ -8,13 +8,14 @@
 export interface HealthCard {
   id: string;
   userId: string;
-  type: 'achievement' | 'summary' | 'milestone' | 'streak' | 'vitals';
+  type: 'achievement' | 'summary' | 'milestone' | 'streak' | 'vitals' | 'story' | 'before-after' | 'quote' | 'stats';
   title: string;
   subtitle?: string;
   data: Record<string, any>;
-  theme: 'gradient-purple' | 'gradient-blue' | 'gradient-green' | 'gradient-pink' | 'solid-medical';
+  theme: 'gradient-purple' | 'gradient-blue' | 'gradient-green' | 'gradient-pink' | 'solid-medical' | 'gradient-sunset' | 'gradient-ocean' | 'gradient-forest';
   imageUrl?: string;
   createdAt: string;
+  format?: 'square' | 'story' | 'post'; // Instagram formats
 }
 
 export interface CardTemplate {
@@ -62,6 +63,34 @@ export const cardTemplates: CardTemplate[] = [
     description: 'Display your latest vital measurements',
     requiredData: ['bloodPressure', 'heartRate', 'temperature'],
     previewImage: '/templates/vitals.png'
+  },
+  {
+    type: 'story',
+    title: 'Instagram Story',
+    description: '9:16 vertical format perfect for Instagram Stories',
+    requiredData: ['mainText', 'subText', 'emoji'],
+    previewImage: '/templates/story.png'
+  },
+  {
+    type: 'before-after',
+    title: 'Before & After',
+    description: 'Show your health transformation journey',
+    requiredData: ['beforeValue', 'afterValue', 'metric', 'timeframe'],
+    previewImage: '/templates/before-after.png'
+  },
+  {
+    type: 'quote',
+    title: 'Health Motivation Quote',
+    description: 'Inspirational health quotes to share',
+    requiredData: ['quote', 'author'],
+    previewImage: '/templates/quote.png'
+  },
+  {
+    type: 'stats',
+    title: 'Health Stats Card',
+    description: 'Showcase your health statistics beautifully',
+    requiredData: ['stat1', 'stat2', 'stat3', 'stat4'],
+    previewImage: '/templates/stats.png'
   }
 ];
 

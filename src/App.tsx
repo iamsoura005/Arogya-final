@@ -9,11 +9,18 @@ import ModelComparisonDashboardV2 from './components/ModelComparison/ModelCompar
 import PersonalDashboard from './components/PersonalDashboard';
 import AppointmentScheduler from './components/AppointmentScheduler';
 import MedicationTracker from './components/MedicationTracker';
+import EmergencyResponse from './components/EmergencyResponse';
+import ComplianceSettings from './components/ComplianceSettings';
+import HealthCardGenerator from './components/HealthCardGenerator';
+import ExportSettings from './components/ExportSettings';
+import HealthAnalyticsDashboard from './components/HealthAnalyticsDashboard';
+import LabReportAnalyzer from './components/LabReportAnalyzer';
+import FamilyHealthHub from './components/FamilyHealthHub';
 import { AuthContext, User } from './context/AuthContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import LanguageSelector from './components/LanguageSelector';
 
-type Page = 'landing' | 'login' | 'dashboard' | 'consultation' | 'benchmarking' | 'model-comparison' | 'personal-dashboard' | 'appointments' | 'medications';
+type Page = 'landing' | 'login' | 'dashboard' | 'consultation' | 'benchmarking' | 'model-comparison' | 'personal-dashboard' | 'appointments' | 'medications' | 'emergency' | 'compliance' | 'health-cards' | 'export' | 'analytics' | 'lab-reports' | 'family-hub';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('landing');
@@ -146,6 +153,13 @@ function App() {
               onViewPersonalDashboard={() => setCurrentPage('personal-dashboard')}
               onViewAppointments={() => setCurrentPage('appointments')}
               onViewMedications={() => setCurrentPage('medications')}
+              onViewEmergency={() => setCurrentPage('emergency')}
+              onViewCompliance={() => setCurrentPage('compliance')}
+              onViewHealthCards={() => setCurrentPage('health-cards')}
+              onViewExport={() => setCurrentPage('export')}
+              onViewAnalytics={() => setCurrentPage('analytics')}
+              onViewLabReports={() => setCurrentPage('lab-reports')}
+              onViewFamilyHub={() => setCurrentPage('family-hub')}
             />
           )}
           {currentPage === 'consultation' && user && (
@@ -181,6 +195,27 @@ function App() {
               userId={user.id} 
               onBack={() => setCurrentPage('dashboard')}
             />
+          )}
+          {currentPage === 'emergency' && user && (
+            <EmergencyResponse onBack={() => setCurrentPage('dashboard')} />
+          )}
+          {currentPage === 'compliance' && user && (
+            <ComplianceSettings onBack={() => setCurrentPage('dashboard')} />
+          )}
+          {currentPage === 'health-cards' && user && (
+            <HealthCardGenerator onBack={() => setCurrentPage('dashboard')} />
+          )}
+          {currentPage === 'export' && user && (
+            <ExportSettings onBack={() => setCurrentPage('dashboard')} />
+          )}
+          {currentPage === 'analytics' && user && (
+            <HealthAnalyticsDashboard onBack={() => setCurrentPage('dashboard')} />
+          )}
+          {currentPage === 'lab-reports' && user && (
+            <LabReportAnalyzer onBack={() => setCurrentPage('dashboard')} />
+          )}
+          {currentPage === 'family-hub' && user && (
+            <FamilyHealthHub onBack={() => setCurrentPage('dashboard')} />
           )}
         </motion.div>
       </div>
