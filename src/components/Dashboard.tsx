@@ -11,9 +11,10 @@ interface DashboardProps {
   onViewBenchmarking: () => void;
   onViewModelComparison: () => void;
   onViewPersonalDashboard?: () => void;
+  onViewAppointments?: () => void;
 }
 
-export default function Dashboard({ user, consultations, onLogout, onStartConsultation, onViewBenchmarking, onViewModelComparison, onViewPersonalDashboard }: DashboardProps) {
+export default function Dashboard({ user, consultations, onLogout, onStartConsultation, onViewBenchmarking, onViewModelComparison, onViewPersonalDashboard, onViewAppointments }: DashboardProps) {
   const [showPrescription, setShowPrescription] = useState(false);
 
   const containerVariants = {
@@ -183,8 +184,20 @@ export default function Dashboard({ user, consultations, onLogout, onStartConsul
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.25 }}
-          className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto"
+          className="mb-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl mx-auto"
         >
+          {onViewAppointments && (
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={onViewAppointments}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors flex items-center justify-center space-x-2"
+            >
+              <Calendar className="w-5 h-5" />
+              <span>Book Appointment</span>
+            </motion.button>
+          )}
+          
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}

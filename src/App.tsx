@@ -7,9 +7,10 @@ import ConsultationInterface from './components/ConsultationInterface';
 import BenchmarkingDashboard from './components/BenchmarkingDashboard/BenchmarkingDashboard';
 import ModelComparisonDashboardV2 from './components/ModelComparison/ModelComparisonDashboardV2';
 import PersonalDashboard from './components/PersonalDashboard';
+import AppointmentScheduler from './components/AppointmentScheduler';
 import { AuthContext, User } from './context/AuthContext';
 
-type Page = 'landing' | 'login' | 'dashboard' | 'consultation' | 'benchmarking' | 'model-comparison' | 'personal-dashboard';
+type Page = 'landing' | 'login' | 'dashboard' | 'consultation' | 'benchmarking' | 'model-comparison' | 'personal-dashboard' | 'appointments';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('landing');
@@ -132,6 +133,7 @@ function App() {
               onViewBenchmarking={() => setCurrentPage('benchmarking')}
               onViewModelComparison={() => setCurrentPage('model-comparison')}
               onViewPersonalDashboard={() => setCurrentPage('personal-dashboard')}
+              onViewAppointments={() => setCurrentPage('appointments')}
             />
           )}
           {currentPage === 'consultation' && user && (
@@ -153,6 +155,13 @@ function App() {
           )}
           {currentPage === 'personal-dashboard' && user && (
             <PersonalDashboard onBack={() => setCurrentPage('dashboard')} />
+          )}
+          {currentPage === 'appointments' && user && (
+            <AppointmentScheduler
+              userId={user.id}
+              userName={user.name}
+              userEmail={user.email}
+            />
           )}
         </motion.div>
       </div>
