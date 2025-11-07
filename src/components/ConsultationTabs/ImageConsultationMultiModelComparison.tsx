@@ -428,6 +428,140 @@ export default function ImageConsultationMultiModelComparison({ onEndConsultatio
           </motion.div>
         )}
 
+        {/* Performance Bar Chart Comparison */}
+        {modelResults.length > 0 && modelResults.every(m => m.status === 'success') && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="card"
+          >
+            <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
+              <TrendingUp className="w-5 h-5 mr-2" />
+              Performance Comparison Chart
+            </h3>
+            
+            <div className="space-y-6">
+              {/* Legend */}
+              <div className="flex flex-wrap gap-4 justify-center">
+                {modelResults.map((model) => (
+                  <div key={model.modelName} className="flex items-center space-x-2">
+                    <div className={`w-4 h-4 rounded bg-gradient-to-r ${model.color}`} />
+                    <span className="text-sm font-medium text-gray-700">{model.modelName}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Bar Chart */}
+              <div className="relative">
+                {/* Y-axis labels */}
+                <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between text-xs text-gray-500 pr-2">
+                  <span>3000ms</span>
+                  <span>2250ms</span>
+                  <span>1500ms</span>
+                  <span>750ms</span>
+                  <span>0ms</span>
+                </div>
+
+                {/* Chart area */}
+                <div className="ml-16 bg-gray-50 rounded-lg p-6 border border-gray-200">
+                  <div className="flex items-end justify-around h-80 space-x-4">
+                    {modelResults.map((model, idx) => {
+                      const maxLatency = 3000; // Max expected latency
+                      const heightPercent = Math.min((model.latencyMs / maxLatency) * 100, 100);
+                      
+                      return (
+                        <div key={model.modelName} className="flex-1 flex flex-col items-center">
+                          {/* Accuracy label at top */}
+                          <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: idx * 0.1 + 0.3 }}
+                            className="mb-2 text-center"
+                          >
+                            <div className="text-xs font-semibold text-gray-600">Accuracy</div>
+                            <div className="text-lg font-bold text-gray-900">
+                              {Math.round(model.confidence)}%
+                            </div>
+                          </motion.div>
+
+                          {/* Bar */}
+                          <motion.div
+                            initial={{ height: 0 }}
+                            animate={{ height: `${heightPercent}%` }}
+                            transition={{ duration: 0.8, delay: idx * 0.1 }}
+                            className={`w-full relative rounded-t-lg bg-gradient-to-t ${model.color} shadow-lg`}
+                            style={{ minHeight: '20px' }}
+                          >
+                            {/* Latency value inside bar */}
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <span className="text-white font-bold text-sm drop-shadow-lg">
+                                {Math.round(model.latencyMs)}ms
+                              </span>
+                            </div>
+                          </motion.div>
+
+                          {/* Model name at bottom */}
+                          <div className="mt-2 text-center">
+                            <div className="text-xl mb-1">{model.modelIcon}</div>
+                            <div className="text-xs font-medium text-gray-700 max-w-[100px] break-words">
+                              {model.modelName}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* X-axis */}
+                  <div className="mt-4 pt-4 border-t border-gray-300">
+                    <div className="text-center text-sm font-semibold text-gray-700">
+                      Response Time (Latency in milliseconds)
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Performance Summary */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                <div className="bg-blue-50 rounded-lg p-3 text-center border border-blue-200">
+                  <div className="text-xs text-blue-600 font-semibold mb-1">Fastest</div>
+                  <div className="text-lg font-bold text-blue-900">
+                    {modelResults.reduce((min, m) => m.latencyMs < min.latencyMs ? m : min).modelName}
+                  </div>
+                  <div className="text-xs text-blue-600">
+                    {Math.round(modelResults.reduce((min, m) => m.latencyMs < min.latencyMs ? m : min).latencyMs)}ms
+                  </div>
+                </div>
+                
+                <div className="bg-green-50 rounded-lg p-3 text-center border border-green-200">
+                  <div className="text-xs text-green-600 font-semibold mb-1">Most Accurate</div>
+                  <div className="text-lg font-bold text-green-900">
+                    {modelResults.reduce((max, m) => m.confidence > max.confidence ? m : max).modelName}
+                  </div>
+                  <div className="text-xs text-green-600">
+                    {Math.round(modelResults.reduce((max, m) => m.confidence > max.confidence ? m : max).confidence)}%
+                  </div>
+                </div>
+                
+                <div className="bg-purple-50 rounded-lg p-3 text-center border border-purple-200">
+                  <div className="text-xs text-purple-600 font-semibold mb-1">Avg Latency</div>
+                  <div className="text-lg font-bold text-purple-900">
+                    {Math.round(modelResults.reduce((sum, m) => sum + m.latencyMs, 0) / modelResults.length)}ms
+                  </div>
+                </div>
+                
+                <div className="bg-orange-50 rounded-lg p-3 text-center border border-orange-200">
+                  <div className="text-xs text-orange-600 font-semibold mb-1">Avg Accuracy</div>
+                  <div className="text-lg font-bold text-orange-900">
+                    {Math.round(modelResults.reduce((sum, m) => sum + m.confidence, 0) / modelResults.length)}%
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         {/* Consensus Result */}
         {consensus && (
           <motion.div
