@@ -258,6 +258,78 @@ export function generateMultiModelReport(data: MultiModelReport): void {
   pdf.line(20, yPosition, 190, yPosition);
   yPosition += 8;
   
+  // Visual Bar Chart
+  pdf.setFontSize(12);
+  pdf.setTextColor(20, 184, 166);
+  pdf.text('PERFORMANCE BAR CHART', 20, yPosition);
+  yPosition += 8;
+  
+  // Model colors (RGB values)
+  const modelColors: { [key: string]: [number, number, number] } = {
+    'Gemini API': [147, 51, 234],        // Purple
+    'ResNet50': [16, 185, 129],          // Green
+    'OpenCV': [249, 115, 22],            // Orange
+    'YOLOv8': [236, 72, 153]             // Pink
+  };
+  
+  const chartHeight = 60;
+  const chartWidth = 160;
+  const barWidth = 35;
+  const maxLatency = Math.max(...data.models.map(m => m.latency));
+  const startX = 25;
+  
+  // Draw chart background
+  pdf.setFillColor(249, 250, 251);
+  pdf.rect(startX - 5, yPosition, chartWidth, chartHeight, 'F');
+  
+  // Draw bars and labels
+  data.models.forEach((model, index) => {
+    const xPos = startX + (index * 42);
+    const barHeight = (model.latency / maxLatency) * (chartHeight - 25);
+    const barY = yPosition + (chartHeight - 10) - barHeight;
+    
+    // Get color for model
+    const color = modelColors[model.modelName] || [100, 100, 100];
+    
+    // Draw bar
+    pdf.setFillColor(color[0], color[1], color[2]);
+    pdf.rect(xPos, barY, barWidth, barHeight, 'F');
+    
+    // Add accuracy label on top
+    pdf.setFontSize(8);
+    pdf.setTextColor(0, 0, 0);
+    pdf.setFont(undefined, 'bold');
+    const accuracyText = `${model.confidence.toFixed(0)}%`;
+    const textWidth = pdf.getTextWidth(accuracyText);
+    pdf.text(accuracyText, xPos + (barWidth / 2) - (textWidth / 2), barY - 2);
+    
+    // Add latency inside bar
+    pdf.setFontSize(7);
+    pdf.setTextColor(255, 255, 255);
+    const latencyText = `${(model.latency * 1000).toFixed(0)}ms`;
+    const latencyWidth = pdf.getTextWidth(latencyText);
+    pdf.text(latencyText, xPos + (barWidth / 2) - (latencyWidth / 2), barY + barHeight / 2 + 2);
+    
+    // Add model name below
+    pdf.setFontSize(7);
+    pdf.setTextColor(0, 0, 0);
+    pdf.setFont(undefined, 'normal');
+    const modelNameShort = model.modelName.length > 8 ? model.modelName.substring(0, 8) : model.modelName;
+    const nameWidth = pdf.getTextWidth(modelNameShort);
+    pdf.text(modelNameShort, xPos + (barWidth / 2) - (nameWidth / 2), yPosition + chartHeight - 2);
+  });
+  
+  // Add chart title below
+  yPosition += chartHeight + 5;
+  pdf.setFontSize(8);
+  pdf.setTextColor(100, 100, 100);
+  pdf.text('Response Time (ms) vs Accuracy (%)', startX + 20, yPosition);
+  
+  yPosition += 10;
+  pdf.setDrawColor(200, 200, 200);
+  pdf.line(20, yPosition, 190, yPosition);
+  yPosition += 8;
+  
   // Model Results
   pdf.setFontSize(12);
   pdf.setTextColor(20, 184, 166);
