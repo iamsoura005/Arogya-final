@@ -24,6 +24,14 @@ import {
 } from '../../services/bertService';
 import { generateSymptomCheckerReport } from '../../utils/pdfGenerator';
 import { AuthContext } from '../../context/AuthContext';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { 
+  chatbotResponses, 
+  getRandomResponse, 
+  translateDisease, 
+  translateSymptom,
+  Language as ChatLanguage
+} from '../../utils/multilingualChatbot';
 
 // Register Chart.js components
 ChartJS.register(
@@ -64,6 +72,7 @@ const commonSymptoms = [
 
 export default function SymptomChecker({ onClose }: SymptomCheckerProps) {
   const { user } = useContext(AuthContext);
+  const { language, t } = useLanguage();
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [detectedDiseases, setDetectedDiseases] = useState<any[]>([]);

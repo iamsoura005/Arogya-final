@@ -10,6 +10,8 @@ import PersonalDashboard from './components/PersonalDashboard';
 import AppointmentScheduler from './components/AppointmentScheduler';
 import MedicationTracker from './components/MedicationTracker';
 import { AuthContext, User } from './context/AuthContext';
+import { LanguageProvider } from './contexts/LanguageContext';
+import LanguageSelector from './components/LanguageSelector';
 
 type Page = 'landing' | 'login' | 'dashboard' | 'consultation' | 'benchmarking' | 'model-comparison' | 'personal-dashboard' | 'appointments' | 'medications';
 
@@ -110,12 +112,20 @@ function App() {
   };
 
   return (
-    <AuthContext.Provider value={{ user, setUser }}>
-      <div className="min-h-screen bg-gray-50">
-        <motion.div
-          key={currentPage}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+    <LanguageProvider>
+      <AuthContext.Provider value={{ user, setUser }}>
+        <div className="min-h-screen bg-gray-50">
+          {/* Language Selector - Show on all pages except landing */}
+          {currentPage !== 'landing' && (
+            <div className="fixed top-4 right-4 z-50">
+              <LanguageSelector />
+            </div>
+          )}
+          
+          <motion.div
+            key={currentPage}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
         >
@@ -175,6 +185,7 @@ function App() {
         </motion.div>
       </div>
     </AuthContext.Provider>
+    </LanguageProvider>
   );
 }
 

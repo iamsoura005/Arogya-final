@@ -1,10 +1,19 @@
-import { Mic, StopCircle, Send, Download } from 'lucide-react';
+import { Mic, StopCircle, Send, Download, Globe } from 'lucide-react';
 import { useState, useRef, useEffect, useContext } from 'react';
 import { motion } from 'framer-motion';
 import { getChatResponse } from '../../services/geminiService';
 import PrescriptionModal from '../PrescriptionModal';
 import { AuthContext } from '../../context/AuthContext';
 import { generateVoiceReport } from '../../utils/pdfGenerator';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { 
+  voiceLanguages, 
+  getSpeechRecognitionConfig, 
+  speak, 
+  stopSpeaking,
+  voiceConsultationResponses 
+} from '../../utils/multilingualVoice';
+import { chatbotResponses, getRandomResponse, Language as ChatLanguage } from '../../utils/multilingualChatbot';
 
 interface VoiceConsultationProps {
   onEndConsultation: (data: any) => void;
@@ -25,11 +34,12 @@ const DOCTOR_AVATARS = [
 
 export default function VoiceConsultation({ onEndConsultation }: VoiceConsultationProps) {
   const { user } = useContext(AuthContext);
+  const { language, t } = useLanguage();
   const [messages, setMessages] = useState<VoiceMessage[]>([
     {
       id: '1',
       type: 'bot',
-      text: 'Hello! I am your AI health assistant. Press the microphone button and describe your symptoms.'
+      text: getRandomResponse(chatbotResponses[language as ChatLanguage].greeting)
     }
   ]);
   const [isListening, setIsListening] = useState(false);
@@ -43,10 +53,11 @@ export default function VoiceConsultation({ onEndConsultation }: VoiceConsultati
   useEffect(() => {
     const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
     if (SpeechRecognition) {
+      const config = getSpeechRecognitionConfig(language as 'en' | 'hi' | 'bn');
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.continuous = false;
       recognitionRef.current.interimResults = true;
-      recognitionRef.current.lang = 'en-US';
+      recognitionRef.current.lang = config.lang;
 
       recognitionRef.current.onstart = () => {
         setIsListening(true);
@@ -119,15 +130,14 @@ export default function VoiceConsultation({ onEndConsultation }: VoiceConsultati
       
       setCurrentAvatar(DOCTOR_AVATARS[Math.floor(Math.random() * DOCTOR_AVATARS.length)]);
       
-      const utterance = new SpeechSynthesisUtterance(aiResponse);
-      utterance.rate = 1;
-      window.speechSynthesis.speak(utterance);
+      // Use multilingual text-to-speech
+      speak(aiResponse, language as 'en' | 'hi' | 'bn');
     } catch (error) {
       console.error('Error:', error);
       const errorMessage: VoiceMessage = {
         id: (Date.now() + 1).toString(),
         type: 'bot',
-        text: 'I encountered an error. Please try again.'
+        text: voiceConsultationResponses[language as 'en' | 'hi' | 'bn'].errorOccurred
       };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
@@ -183,8 +193,14 @@ export default function VoiceConsultation({ onEndConsultation }: VoiceConsultati
             transition={{ duration: 0.6 }}
             className="text-center mb-8"
           >
-            <h2 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">Voice Consultation</h2>
-            <p className="text-gray-600 mb-6">Speak naturally about your health concerns</p>
+            <h2 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">{t.voiceConsultation.title}</h2>
+            <p className="text-gray-600 mb-2">{t.voiceConsultation.subtitle}</p>
+            
+            {/* Language Indicator */}
+            <div className="flex items-center justify-center gap-2 text-sm text-gray-600 mb-4">
+              <Globe className="w-4 h-4" />
+              <span>{t.voiceConsultation.language}: {voiceLanguages[language as 'en' | 'hi' | 'bn'].nativeName}</span>
+            </div>
 
             <motion.div
               animate={{ scale: isListening ? 1.1 : 1 }}
