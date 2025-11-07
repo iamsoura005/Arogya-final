@@ -233,23 +233,72 @@ export default function ImageConsultationMultiModelComparison({ onEndConsultatio
     const completedModels = modelResults.filter(m => m.status === 'success');
     const consensusConfidence = consensus ? consensus.confidence : 0;
     
+    // Build comprehensive findings for each model
+    const modelFindings = completedModels.map(model => ({
+      modelName: model.modelName,
+      confidence: model.confidence,
+      latency: model.latencyMs / 1000, // Convert to seconds
+      findings: [
+        model.diagnosis,
+        model.description,
+        `Processing Speed: ${Math.round(model.latencyMs)}ms`,
+        `Confidence Level: ${Math.round(model.confidence)}%`
+      ]
+    }));
+
+    // Build comprehensive Gemini analysis description
+    let analysisDescription = `Condition Type: ${geminiResult.conditionType}.\n`;
+    
+    // Add dataset insights if available
+    if (geminiResult.datasetEnhanced && geminiResult.datasetInsights && geminiResult.datasetInsights.length > 0) {
+      analysisDescription += '\n Clinical Dataset Validation:\n';
+      analysisDescription += geminiResult.datasetInsights.map(insight => `• ${insight}`).join('\n');
+    }
+
+    // Build treatment recommendations
+    let treatmentText = '';
+    if (geminiResult.recommendations && geminiResult.recommendations.length > 0) {
+      treatmentText = geminiResult.recommendations.join('. ');
+    } else {
+      treatmentText = 'Please consult a healthcare professional for specific treatment recommendations.';
+    }
+
+    // Build medicines/precautions list
+    const precautionsList: string[] = [];
+    
+    // Add medicines if available
+    if (geminiResult.medicines && geminiResult.medicines.length > 0) {
+      precautionsList.push('Recommended Medications:');
+      geminiResult.medicines.forEach(med => {
+        precautionsList.push(`${med.name} - ${med.dosage}, ${med.frequency} for ${med.duration}`);
+      });
+    }
+
+    // Add specialist recommendation
+    if (geminiResult.specialistNeeded) {
+      precautionsList.push(`Specialist Consultation: ${geminiResult.specialistNeeded}`);
+    }
+
+    // Add general recommendations
+    if (geminiResult.recommendations && geminiResult.recommendations.length > 0) {
+      precautionsList.push('General Recommendations:');
+      geminiResult.recommendations.forEach(rec => {
+        precautionsList.push(`• ${rec}`);
+      });
+    }
+    
     generateMultiModelReport({
       user: user,
       date: new Date().toLocaleDateString(),
-      reportType: 'Multi-Model Comparison',
-      models: completedModels.map(model => ({
-        modelName: model.modelName,
-        confidence: model.confidence,
-        latency: model.latencyMs / 1000, // Convert to seconds
-        findings: [model.description]
-      })),
+      reportType: 'Multi-Model Comparison Analysis',
+      models: modelFindings,
       consensus: consensusConfidence,
       geminiAnalysis: {
         diagnosis: geminiResult.diagnosis,
         severity: geminiResult.severity,
-        description: `Condition Type: ${geminiResult.conditionType}. ${geminiResult.datasetInsights?.join(' ') || ''}`,
-        treatment: geminiResult.recommendations?.join('. ') || 'No specific recommendations provided.',
-        precautions: geminiResult.medicines?.map(m => `${m.name} - ${m.dosage}, ${m.frequency} for ${m.duration}`) || []
+        description: analysisDescription,
+        treatment: treatmentText,
+        precautions: precautionsList
       }
     });
   };

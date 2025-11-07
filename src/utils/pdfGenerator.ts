@@ -200,9 +200,60 @@ export function generateMultiModelReport(data: MultiModelReport): void {
   pdf.setTextColor(0, 0, 0);
   pdf.setFont(undefined, 'bold');
   pdf.text(`Average Confidence: ${data.consensus.toFixed(1)}%`, 20, yPosition);
+  yPosition += 6;
   pdf.setFont(undefined, 'normal');
+  pdf.text(`Models Analyzed: ${data.models.length}`, 20, yPosition);
   
   yPosition += 10;
+  pdf.setDrawColor(200, 200, 200);
+  pdf.line(20, yPosition, 190, yPosition);
+  yPosition += 8;
+  
+  // Performance Summary (Bar Chart Data)
+  pdf.setFontSize(12);
+  pdf.setTextColor(20, 184, 166);
+  pdf.text('PERFORMANCE COMPARISON SUMMARY', 20, yPosition);
+  yPosition += 8;
+  
+  // Find best performers
+  const fastestModel = data.models.reduce((min, m) => m.latency < min.latency ? m : min);
+  const mostAccurate = data.models.reduce((max, m) => m.confidence > max.confidence ? m : max);
+  const avgLatency = data.models.reduce((sum, m) => sum + m.latency, 0) / data.models.length;
+  const avgAccuracy = data.models.reduce((sum, m) => sum + m.confidence, 0) / data.models.length;
+  
+  pdf.setFontSize(10);
+  pdf.setTextColor(0, 0, 0);
+  
+  // Performance metrics in a box
+  pdf.setDrawColor(20, 184, 166);
+  pdf.setLineWidth(0.5);
+  pdf.rect(20, yPosition, 170, 35);
+  
+  yPosition += 7;
+  pdf.setFont(undefined, 'bold');
+  pdf.text(`Fastest Model: ${fastestModel.modelName}`, 25, yPosition);
+  pdf.setFont(undefined, 'normal');
+  pdf.text(`(${fastestModel.latency.toFixed(2)}s)`, 90, yPosition);
+  
+  yPosition += 7;
+  pdf.setFont(undefined, 'bold');
+  pdf.text(`Most Accurate: ${mostAccurate.modelName}`, 25, yPosition);
+  pdf.setFont(undefined, 'normal');
+  pdf.text(`(${mostAccurate.confidence.toFixed(1)}%)`, 90, yPosition);
+  
+  yPosition += 7;
+  pdf.setFont(undefined, 'bold');
+  pdf.text(`Average Response Time:`, 25, yPosition);
+  pdf.setFont(undefined, 'normal');
+  pdf.text(`${avgLatency.toFixed(2)} seconds`, 90, yPosition);
+  
+  yPosition += 7;
+  pdf.setFont(undefined, 'bold');
+  pdf.text(`Average Accuracy:`, 25, yPosition);
+  pdf.setFont(undefined, 'normal');
+  pdf.text(`${avgAccuracy.toFixed(1)}%`, 90, yPosition);
+  
+  yPosition += 15;
   pdf.setDrawColor(200, 200, 200);
   pdf.line(20, yPosition, 190, yPosition);
   yPosition += 8;
@@ -210,7 +261,7 @@ export function generateMultiModelReport(data: MultiModelReport): void {
   // Model Results
   pdf.setFontSize(12);
   pdf.setTextColor(20, 184, 166);
-  pdf.text('MODEL RESULTS', 20, yPosition);
+  pdf.text('INDIVIDUAL MODEL RESULTS', 20, yPosition);
   yPosition += 8;
   
   data.models.forEach((model, index) => {
@@ -229,13 +280,17 @@ export function generateMultiModelReport(data: MultiModelReport): void {
     pdf.setFont(undefined, 'normal');
     pdf.text(`Confidence: ${model.confidence.toFixed(1)}%`, 25, yPosition);
     yPosition += 5;
-    pdf.text(`Response Time: ${model.latency.toFixed(2)}s`, 25, yPosition);
+    pdf.text(`Response Time: ${model.latency.toFixed(2)}s (${(model.latency * 1000).toFixed(0)}ms)`, 25, yPosition);
     yPosition += 5;
     
     if (model.findings && model.findings.length > 0) {
       pdf.text('Key Findings:', 25, yPosition);
       yPosition += 5;
       model.findings.forEach((finding) => {
+        if (yPosition > 270) {
+          pdf.addPage();
+          yPosition = 20;
+        }
         const wrapped = pdf.splitTextToSize(`• ${finding}`, 160);
         pdf.text(wrapped, 30, yPosition);
         yPosition += wrapped.length * 5;
@@ -246,6 +301,11 @@ export function generateMultiModelReport(data: MultiModelReport): void {
   });
   
   // Gemini Detailed Analysis
+  if (yPosition > 230) {
+    pdf.addPage();
+    yPosition = 20;
+  }
+  
   yPosition += 5;
   pdf.setFontSize(12);
   pdf.setTextColor(20, 184, 166);
