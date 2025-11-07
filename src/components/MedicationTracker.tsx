@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Pill, Clock, Calendar, AlertTriangle, CheckCircle, XCircle, TrendingUp, Package, Bell, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useLanguage } from '../contexts/LanguageContext';
 import medicationService, {
   MedicationSchedule,
   MedicationLog,
@@ -14,6 +15,7 @@ interface MedicationTrackerProps {
 }
 
 const MedicationTracker: React.FC<MedicationTrackerProps> = ({ userId, onBack }) => {
+  const { t } = useLanguage();
   const [medications, setMedications] = useState<MedicationSchedule[]>([]);
   const [todayLogs, setTodayLogs] = useState<MedicationLog[]>([]);
   const [adherenceStats, setAdherenceStats] = useState<AdherenceStats | null>(null);
@@ -186,16 +188,16 @@ const MedicationTracker: React.FC<MedicationTrackerProps> = ({ userId, onBack })
               className="flex items-center space-x-2 text-gray-600 hover:text-purple-600 mb-4 transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
-              <span>Back to Dashboard</span>
+              <span>{t.common.backToDashboard}</span>
             </motion.button>
           )}
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
                 <Pill className="w-8 h-8 text-purple-600" />
-                Medication Tracker
+                {t.medications.title}
               </h1>
-              <p className="text-gray-600 mt-2">Manage your medications and track adherence</p>
+              <p className="text-gray-600 mt-2">{t.medications.subtitle}</p>
             </div>
             <button
               onClick={() => setShowAddForm(!showAddForm)}

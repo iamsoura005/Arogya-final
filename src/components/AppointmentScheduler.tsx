@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, User, Video, Bell, CheckCircle, XCircle, AlertCircle, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useLanguage } from '../contexts/LanguageContext';
 import appointmentService, { 
   Doctor, 
   Appointment, 
@@ -18,9 +19,10 @@ const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
   userId, 
   userName, 
   userEmail,
-  onBack
+  onBack 
 }) => {
-  const [step, setStep] = useState<'doctors' | 'slots' | 'confirm' | 'success'>('doctors');
+  const { t } = useLanguage();
+  const [step, setStep] = useState<'doctors' | 'slots' | 'success' | 'datetime' | 'confirm'>('doctors');
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -180,15 +182,15 @@ const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
               className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 mb-4 transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
-              <span>Back to Dashboard</span>
+              <span>{t.common.backToDashboard}</span>
             </motion.button>
           )}
           
           <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
             <Calendar className="w-8 h-8 text-blue-600" />
-            Appointment Scheduler
+            {t.appointments.title}
           </h1>
-          <p className="text-gray-600 mt-2">Book video consultations with our expert doctors</p>
+          <p className="text-gray-600 mt-2">{t.appointments.subtitle}</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

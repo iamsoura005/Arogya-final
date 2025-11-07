@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { LogOut, Plus, Calendar, FileText, MessageSquare, Mic, Image, AlertCircle, TrendingUp, Download, BarChart3, Activity, Pill } from 'lucide-react';
 import { useState } from 'react';
 import PrescriptionModal from './PrescriptionModal';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface DashboardProps {
   user: { id: string; email: string; name: string };
@@ -16,6 +17,7 @@ interface DashboardProps {
 }
 
 export default function Dashboard({ user, consultations, onLogout, onStartConsultation, onViewBenchmarking, onViewModelComparison, onViewPersonalDashboard, onViewAppointments, onViewMedications }: DashboardProps) {
+  const { t } = useLanguage();
   const [showPrescription, setShowPrescription] = useState(false);
 
   const containerVariants = {
@@ -92,7 +94,7 @@ export default function Dashboard({ user, consultations, onLogout, onStartConsul
                 <span className="text-white font-bold text-sm">{user.name[0].toUpperCase()}</span>
               </div>
               <div>
-                <h1 className="text-xl font-bold text-neutral-900">Welcome, {user.name}!</h1>
+                <h1 className="text-xl font-bold text-neutral-900">{t.dashboard.welcomeBack}, {user.name}!</h1>
                 <p className="text-sm text-neutral-600">{user.email}</p>
               </div>
             </div>
@@ -103,7 +105,7 @@ export default function Dashboard({ user, consultations, onLogout, onStartConsul
               className="flex items-center space-x-2 px-4 py-2 text-neutral-700 hover:text-neutral-900 transition-colors"
             >
               <LogOut className="w-5 h-5" />
-              <span className="hidden sm:inline">Logout</span>
+              <span className="hidden sm:inline">{t.auth.logout}</span>
             </motion.button>
           </div>
         </div>
@@ -165,8 +167,8 @@ export default function Dashboard({ user, consultations, onLogout, onStartConsul
         >
           <div className="flex items-center justify-between flex-col sm:flex-row space-y-4 sm:space-y-0">
             <div>
-              <h2 className="text-2xl font-bold mb-2">Start a New Consultation</h2>
-              <p className="text-primary-100">Chat with our AI doctor, use voice, or upload medical images for analysis</p>
+              <h2 className="text-2xl font-bold mb-2">{t.dashboard.checkSymptoms}</h2>
+              <p className="text-primary-100">{t.symptomChecker.subtitle}</p>
             </div>
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -175,7 +177,7 @@ export default function Dashboard({ user, consultations, onLogout, onStartConsul
               className="flex items-center space-x-2 bg-white text-primary-600 font-semibold px-6 py-3 rounded-lg hover:bg-neutral-100 transition-colors whitespace-nowrap"
             >
               <Plus className="w-5 h-5" />
-              <span>New Consultation</span>
+              <span>{t.dashboard.checkSymptoms}</span>
             </motion.button>
           </div>
         </motion.div>
@@ -195,7 +197,7 @@ export default function Dashboard({ user, consultations, onLogout, onStartConsul
               className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors flex items-center justify-center space-x-2"
             >
               <Calendar className="w-5 h-5" />
-              <span>Book Appointment</span>
+              <span>{t.dashboard.bookAppointment}</span>
             </motion.button>
           )}
           
@@ -207,7 +209,7 @@ export default function Dashboard({ user, consultations, onLogout, onStartConsul
               className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors flex items-center justify-center space-x-2"
             >
               <Pill className="w-5 h-5" />
-              <span>Track Medications</span>
+              <span>{t.dashboard.trackMedications}</span>
             </motion.button>
           )}
           
@@ -218,7 +220,7 @@ export default function Dashboard({ user, consultations, onLogout, onStartConsul
             className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors flex items-center justify-center space-x-2"
           >
             <Download className="w-5 h-5" />
-            <span>Download Prescription</span>
+            <span>{t.common.download} Prescription</span>
           </motion.button>
           
           {onViewPersonalDashboard && (
@@ -229,7 +231,7 @@ export default function Dashboard({ user, consultations, onLogout, onStartConsul
               className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors flex items-center justify-center space-x-2"
             >
               <Activity className="w-5 h-5" />
-              <span>Health Dashboard</span>
+              <span>{t.dashboard.healthMetrics}</span>
             </motion.button>
           )}
         </motion.div>
