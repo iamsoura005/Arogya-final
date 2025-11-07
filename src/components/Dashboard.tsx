@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { LogOut, Plus, Calendar, FileText, MessageSquare, Mic, Image, AlertCircle, TrendingUp, Download, BarChart3, Activity } from 'lucide-react';
+import { LogOut, Plus, Calendar, FileText, MessageSquare, Mic, Image, AlertCircle, TrendingUp, Download, BarChart3, Activity, Pill } from 'lucide-react';
 import { useState } from 'react';
 import PrescriptionModal from './PrescriptionModal';
 
@@ -12,9 +12,10 @@ interface DashboardProps {
   onViewModelComparison: () => void;
   onViewPersonalDashboard?: () => void;
   onViewAppointments?: () => void;
+  onViewMedications?: () => void;
 }
 
-export default function Dashboard({ user, consultations, onLogout, onStartConsultation, onViewBenchmarking, onViewModelComparison, onViewPersonalDashboard, onViewAppointments }: DashboardProps) {
+export default function Dashboard({ user, consultations, onLogout, onStartConsultation, onViewBenchmarking, onViewModelComparison, onViewPersonalDashboard, onViewAppointments, onViewMedications }: DashboardProps) {
   const [showPrescription, setShowPrescription] = useState(false);
 
   const containerVariants = {
@@ -195,6 +196,18 @@ export default function Dashboard({ user, consultations, onLogout, onStartConsul
             >
               <Calendar className="w-5 h-5" />
               <span>Book Appointment</span>
+            </motion.button>
+          )}
+          
+          {onViewMedications && (
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={onViewMedications}
+              className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors flex items-center justify-center space-x-2"
+            >
+              <Pill className="w-5 h-5" />
+              <span>Track Medications</span>
             </motion.button>
           )}
           

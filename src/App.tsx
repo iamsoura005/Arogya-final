@@ -8,9 +8,10 @@ import BenchmarkingDashboard from './components/BenchmarkingDashboard/Benchmarki
 import ModelComparisonDashboardV2 from './components/ModelComparison/ModelComparisonDashboardV2';
 import PersonalDashboard from './components/PersonalDashboard';
 import AppointmentScheduler from './components/AppointmentScheduler';
+import MedicationTracker from './components/MedicationTracker';
 import { AuthContext, User } from './context/AuthContext';
 
-type Page = 'landing' | 'login' | 'dashboard' | 'consultation' | 'benchmarking' | 'model-comparison' | 'personal-dashboard' | 'appointments';
+type Page = 'landing' | 'login' | 'dashboard' | 'consultation' | 'benchmarking' | 'model-comparison' | 'personal-dashboard' | 'appointments' | 'medications';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('landing');
@@ -134,6 +135,7 @@ function App() {
               onViewModelComparison={() => setCurrentPage('model-comparison')}
               onViewPersonalDashboard={() => setCurrentPage('personal-dashboard')}
               onViewAppointments={() => setCurrentPage('appointments')}
+              onViewMedications={() => setCurrentPage('medications')}
             />
           )}
           {currentPage === 'consultation' && user && (
@@ -162,6 +164,9 @@ function App() {
               userName={user.name}
               userEmail={user.email}
             />
+          )}
+          {currentPage === 'medications' && user && (
+            <MedicationTracker userId={user.id} />
           )}
         </motion.div>
       </div>
