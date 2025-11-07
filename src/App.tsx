@@ -163,10 +163,14 @@ function App() {
               userId={user.id}
               userName={user.name}
               userEmail={user.email}
+              onBack={() => setCurrentPage('dashboard')}
             />
           )}
           {currentPage === 'medications' && user && (
-            <MedicationTracker userId={user.id} />
+            <MedicationTracker 
+              userId={user.id} 
+              onBack={() => setCurrentPage('dashboard')}
+            />
           )}
         </motion.div>
       </div>

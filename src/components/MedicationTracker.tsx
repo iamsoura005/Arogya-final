@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Pill, Clock, Calendar, AlertTriangle, CheckCircle, XCircle, TrendingUp, Package, Bell } from 'lucide-react';
+import { Pill, Clock, Calendar, AlertTriangle, CheckCircle, XCircle, TrendingUp, Package, Bell, ArrowLeft } from 'lucide-react';
+import { motion } from 'framer-motion';
 import medicationService, {
   MedicationSchedule,
   MedicationLog,
@@ -9,9 +10,10 @@ import medicationService, {
 
 interface MedicationTrackerProps {
   userId: string;
+  onBack?: () => void;
 }
 
-const MedicationTracker: React.FC<MedicationTrackerProps> = ({ userId }) => {
+const MedicationTracker: React.FC<MedicationTrackerProps> = ({ userId, onBack }) => {
   const [medications, setMedications] = useState<MedicationSchedule[]>([]);
   const [todayLogs, setTodayLogs] = useState<MedicationLog[]>([]);
   const [adherenceStats, setAdherenceStats] = useState<AdherenceStats | null>(null);
@@ -176,6 +178,17 @@ const MedicationTracker: React.FC<MedicationTrackerProps> = ({ userId }) => {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+          {onBack && (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onBack}
+              className="flex items-center space-x-2 text-gray-600 hover:text-purple-600 mb-4 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              <span>Back to Dashboard</span>
+            </motion.button>
+          )}
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">

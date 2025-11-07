@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, User, Video, Bell, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { Calendar, Clock, User, Video, Bell, CheckCircle, XCircle, AlertCircle, ArrowLeft } from 'lucide-react';
+import { motion } from 'framer-motion';
 import appointmentService, { 
   Doctor, 
   Appointment, 
@@ -10,12 +11,14 @@ interface AppointmentSchedulerProps {
   userId: string;
   userName: string;
   userEmail: string;
+  onBack?: () => void;
 }
 
 const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({ 
   userId, 
   userName, 
-  userEmail 
+  userEmail,
+  onBack
 }) => {
   const [step, setStep] = useState<'doctors' | 'slots' | 'confirm' | 'success'>('doctors');
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -168,6 +171,19 @@ const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+          {/* Back Button */}
+          {onBack && (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onBack}
+              className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 mb-4 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              <span>Back to Dashboard</span>
+            </motion.button>
+          )}
+          
           <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
             <Calendar className="w-8 h-8 text-blue-600" />
             Appointment Scheduler
