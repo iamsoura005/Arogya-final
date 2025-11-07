@@ -43,30 +43,27 @@ const MedicationTracker: React.FC<MedicationTrackerProps> = ({ userId }) => {
   }, [userId]);
 
   const loadMedications = () => {
-    const meds = medicationService.getAllSchedules(userId);
+    const meds = medicationService.getUserMedications(userId);
     setMedications(meds);
   };
 
   const loadTodayLogs = () => {
-    const logs = medicationService.getTodayMedicationLogs(userId);
-    setTodayLogs(logs);
+    const todayData = medicationService.getTodaysMedications(userId);
+    setTodayLogs(todayData.flatMap(item => item.logs));
   };
 
   const loadAdherenceStats = () => {
-    const stats = medicationService.getAdherenceStats(userId);
+    const stats = medicationService.calculateAdherence(userId);
     setAdherenceStats(stats);
   };
 
   const checkInteractions = () => {
-    const meds = medicationService.getAllSchedules(userId);
-    const drugNames = meds.map(m => m.medicineName);
-    const interactionList = medicationService.checkDrugInteractions(drugNames);
+    const interactionList = medicationService.getUserDrugInteractionWarnings(userId);
     setInteractions(interactionList);
   };
 
   const checkRefills = () => {
-    const meds = medicationService.getAllSchedules(userId);
-    const needsRefill = meds.filter(m => m.pillsRemaining && m.pillsRemaining <= 7);
+    const needsRefill = medicationService.getMedicationsNeedingRefill(userId);
     setRefillNeeded(needsRefill);
   };
 
@@ -130,8 +127,14 @@ const MedicationTracker: React.FC<MedicationTrackerProps> = ({ userId }) => {
   };
 
   // Log medication taken
-  const handleLogMedication = (logId: string, status: 'taken' | 'missed' | 'skipped') => {
-    medicationService.updateMedicationLog(logId, { status, actualTime: new Date().toISOString() });
+  const handleLogMedication = (scheduleId: string, scheduledTime: string, status: 'taken' | 'missed' | 'skipped') => {
+    if (status === 'taken') {
+      medicationService.logMedicationTaken(scheduleId, scheduledTime);
+    } else if (status === 'missed') {
+      medicationService.logMedicationMissed(scheduleId, scheduledTime);
+    } else if (status === 'skipped') {
+      medicationService.logMedicationSkipped(scheduleId, scheduledTime);
+    }
     loadTodayLogs();
     loadAdherenceStats();
   };
@@ -139,7 +142,7 @@ const MedicationTracker: React.FC<MedicationTrackerProps> = ({ userId }) => {
   // Delete medication
   const handleDeleteMedication = (medicationId: string) => {
     if (confirm('Are you sure you want to delete this medication?')) {
-      medicationService.deleteSchedule(medicationId);
+      medicationService.deleteMedicationSchedule(medicationId);
       loadMedications();
       loadTodayLogs();
       checkInteractions();
@@ -328,17 +331,17 @@ const MedicationTracker: React.FC<MedicationTrackerProps> = ({ userId }) => {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4">
                     <p className="text-sm text-gray-600 mb-1">Overall</p>
-                    <p className={`text-3xl font-bold ${getAdherenceColor(adherenceStats.overallPercentage)}`}>
-                      {adherenceStats.overallPercentage.toFixed(0)}%
+                    <p className={`text-3xl font-bold ${getAdherenceColor(adherenceStats.adherenceRate)}`}>
+                      {adherenceStats.adherenceRate.toFixed(0)}%
                     </p>
                   </div>
                   <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4">
                     <p className="text-sm text-gray-600 mb-1">Taken</p>
-                    <p className="text-3xl font-bold text-blue-600">{adherenceStats.taken}</p>
+                    <p className="text-3xl font-bold text-blue-600">{adherenceStats.takenDoses}</p>
                   </div>
                   <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-lg p-4">
                     <p className="text-sm text-gray-600 mb-1">Missed</p>
-                    <p className="text-3xl font-bold text-red-600">{adherenceStats.missed}</p>
+                    <p className="text-3xl font-bold text-red-600">{adherenceStats.missedDoses}</p>
                   </div>
                   <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4">
                     <p className="text-sm text-gray-600 mb-1">Streak</p>
@@ -355,58 +358,58 @@ const MedicationTracker: React.FC<MedicationTrackerProps> = ({ userId }) => {
                 <Clock className="w-6 h-6 text-purple-600" />
                 Today's Medications
               </h2>
-              {todaySchedule.length === 0 ? (
+              {todayLogs.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
                   <Calendar className="w-12 h-12 mx-auto mb-2 text-gray-300" />
                   <p>No medications scheduled for today</p>
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {todaySchedule.map((schedule) => {
-                    const med = medications.find(m => m.id === schedule.medicationId);
+                  {todayLogs.map((log) => {
+                    const med = medications.find(m => m.id === log.scheduleId);
                     if (!med) return null;
 
                     return (
                       <div
-                        key={schedule.id}
+                        key={log.id}
                         className={`border-2 rounded-lg p-4 ${
-                          schedule.status === 'taken'
+                          log.status === 'taken'
                             ? 'border-green-200 bg-green-50'
-                            : schedule.status === 'missed'
+                            : log.status === 'missed'
                             ? 'border-red-200 bg-red-50'
-                            : schedule.status === 'skipped'
+                            : log.status === 'skipped'
                             ? 'border-yellow-200 bg-yellow-50'
                             : 'border-purple-200 bg-purple-50'
                         }`}
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <h3 className="font-semibold text-lg text-gray-800">{med.name}</h3>
+                            <h3 className="font-semibold text-lg text-gray-800">{med.medicineName}</h3>
                             <p className="text-sm text-gray-600">{med.dosage}</p>
                             <div className="flex items-center gap-4 mt-2">
                               <span className="text-sm text-gray-700 flex items-center gap-1">
                                 <Clock className="w-4 h-4" />
-                                {schedule.scheduledTime}
+                                {new Date(log.scheduledTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                               </span>
-                              {med.instructions && (
+                              {med.foodInstructions && (
                                 <span className="text-sm text-gray-600 italic">
-                                  {med.instructions}
+                                  {med.foodInstructions}
                                 </span>
                               )}
                             </div>
                           </div>
                           <div className="flex flex-col gap-2">
-                            {schedule.status === 'pending' ? (
+                            {log.status === 'pending' ? (
                               <>
                                 <button
-                                  onClick={() => handleLogMedication(schedule.id, 'taken')}
+                                  onClick={() => handleLogMedication(log.scheduleId, log.scheduledTime, 'taken')}
                                   className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 flex items-center gap-1"
                                 >
                                   <CheckCircle className="w-4 h-4" />
                                   Taken
                                 </button>
                                 <button
-                                  onClick={() => handleLogMedication(schedule.id, 'skipped')}
+                                  onClick={() => handleLogMedication(log.scheduleId, log.scheduledTime, 'skipped')}
                                   className="px-4 py-2 bg-yellow-600 text-white rounded-lg text-sm hover:bg-yellow-700 flex items-center gap-1"
                                 >
                                   <XCircle className="w-4 h-4" />
@@ -415,13 +418,13 @@ const MedicationTracker: React.FC<MedicationTrackerProps> = ({ userId }) => {
                               </>
                             ) : (
                               <span className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                                schedule.status === 'taken'
+                                log.status === 'taken'
                                   ? 'bg-green-100 text-green-700'
-                                  : schedule.status === 'missed'
+                                  : log.status === 'missed'
                                   ? 'bg-red-100 text-red-700'
                                   : 'bg-yellow-100 text-yellow-700'
                               }`}>
-                                {schedule.status.charAt(0).toUpperCase() + schedule.status.slice(1)}
+                                {log.status.charAt(0).toUpperCase() + log.status.slice(1)}
                               </span>
                             )}
                           </div>
@@ -453,7 +456,7 @@ const MedicationTracker: React.FC<MedicationTrackerProps> = ({ userId }) => {
                     <div key={med.id} className="border-2 border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <h3 className="font-semibold text-lg text-gray-800">{med.name}</h3>
+                          <h3 className="font-semibold text-lg text-gray-800">{med.medicineName}</h3>
                           <p className="text-sm text-gray-600">{med.dosage} - {med.frequency.replace('_', ' ')}</p>
                           <div className="mt-2 flex flex-wrap gap-2">
                             {med.times.map((time, idx) => (
@@ -463,11 +466,13 @@ const MedicationTracker: React.FC<MedicationTrackerProps> = ({ userId }) => {
                             ))}
                           </div>
                           <p className="text-xs text-gray-500 mt-2">
-                            {med.startDate} {med.endDate && `to ${med.endDate}`}
+                            {med.startDate} to {med.endDate}
                           </p>
-                          <p className="text-xs text-gray-500">
-                            Pills remaining: {med.pillsRemaining} / {med.totalPills}
-                          </p>
+                          {med.pillsRemaining !== undefined && (
+                            <p className="text-xs text-gray-500">
+                              Pills remaining: {med.pillsRemaining}
+                            </p>
+                          )}
                         </div>
                         <button
                           onClick={() => handleDeleteMedication(med.id)}
@@ -499,12 +504,13 @@ const MedicationTracker: React.FC<MedicationTrackerProps> = ({ userId }) => {
                       className={`border-2 rounded-lg p-3 ${getSeverityColor(interaction.severity)}`}
                     >
                       <p className="font-semibold text-sm mb-1">
-                        {interaction.drug1} + {interaction.drug2}
+                        {interaction.drugs.join(' + ')}
                       </p>
                       <p className="text-xs mb-2">
                         <span className="font-medium">Severity:</span> {interaction.severity.toUpperCase()}
                       </p>
-                      <p className="text-xs">{interaction.description}</p>
+                      <p className="text-xs mb-2">{interaction.description}</p>
+                      <p className="text-xs text-gray-700 italic">{interaction.recommendation}</p>
                     </div>
                   ))}
                 </div>
@@ -521,14 +527,16 @@ const MedicationTracker: React.FC<MedicationTrackerProps> = ({ userId }) => {
                 <div className="space-y-3">
                   {refillNeeded.map((med) => (
                     <div key={med.id} className="border-2 border-orange-200 bg-orange-50 rounded-lg p-3">
-                      <p className="font-semibold text-sm text-gray-800">{med.name}</p>
+                      <p className="font-semibold text-sm text-gray-800">{med.medicineName}</p>
                       <p className="text-xs text-gray-600 mt-1">
-                        Only {med.pillsRemaining} pills remaining
+                        {med.pillsRemaining !== undefined ? `Only ${med.pillsRemaining} pills remaining` : 'Refill needed soon'}
                       </p>
-                      <p className="text-xs text-orange-700 mt-2 flex items-center gap-1">
-                        <Bell className="w-3 h-3" />
-                        Order refill soon
-                      </p>
+                      {med.refillDate && (
+                        <p className="text-xs text-orange-700 mt-2 flex items-center gap-1">
+                          <Bell className="w-3 h-3" />
+                          Refill by: {new Date(med.refillDate).toLocaleDateString()}
+                        </p>
+                      )}
                     </div>
                   ))}
                 </div>
