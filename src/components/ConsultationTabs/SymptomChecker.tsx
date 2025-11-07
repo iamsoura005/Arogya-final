@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ChevronRight, AlertCircle, Pill, Activity, CheckCircle, Brain, Heart } from 'lucide-react';
+import { X, ChevronRight, AlertCircle, Pill, Activity, CheckCircle, Brain, Heart, Download } from 'lucide-react';
 import { detectDiseases, getSymptomRecommendations } from '../../services/diseaseDatabase';
 import { 
   analyzeBERTEmotionalContext, 
   generateBERTEnhancedAdvice,
   calculateRecommendationConfidence 
 } from '../../services/bertService';
+import { generateSymptomCheckerReport } from '../../utils/pdfGenerator';
+import { AuthContext } from '../../context/AuthContext';
 
 interface SymptomCheckerProps {
   onClose: () => void;
@@ -36,6 +38,7 @@ const commonSymptoms = [
 ];
 
 export default function SymptomChecker({ onClose }: SymptomCheckerProps) {
+  const { user } = useContext(AuthContext);
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [detectedDiseases, setDetectedDiseases] = useState<any[]>([]);
@@ -83,6 +86,21 @@ export default function SymptomChecker({ onClose }: SymptomCheckerProps) {
     setBertAnalysis(null);
     setEnhancedAdvice(null);
     setConfidenceScore(0);
+  };
+
+  const handleDownloadReport = () => {
+    if (!user || !bertAnalysis || !enhancedAdvice) return;
+    
+    generateSymptomCheckerReport({
+      user,
+      date: new Date().toLocaleDateString(),
+      reportType: 'Symptom Analysis',
+      selectedSymptoms,
+      detectedDiseases,
+      bertAnalysis,
+      enhancedAdvice,
+      confidenceScore
+    });
   };
 
   return (
@@ -353,7 +371,16 @@ export default function SymptomChecker({ onClose }: SymptomCheckerProps) {
               </div>
             )}
 
-            <div className="flex space-x-3">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleDownloadReport}
+                className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold py-3 rounded-lg hover:shadow-lg transition-all flex items-center justify-center space-x-2"
+              >
+                <Download className="w-5 h-5" />
+                <span>Download Report</span>
+              </motion.button>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}

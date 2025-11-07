@@ -42,6 +42,38 @@ interface ChatConsultationReport extends BaseReportData {
   summary: string;
 }
 
+interface SymptomCheckerReport extends BaseReportData {
+  selectedSymptoms: string[];
+  detectedDiseases: Array<{
+    name: string;
+    severity: string;
+    medicines?: Array<{
+      name: string;
+      dosage: string;
+      frequency: string;
+      duration: string;
+    }>;
+    homeRemedies?: string[];
+    redFlags?: string[];
+  }>;
+  bertAnalysis: {
+    emotionalTone: string;
+    severityScore: number;
+    urgencyLevel: string;
+    empathyLevel: string;
+    contextualInsights: string[];
+    recommendedResponse: string;
+  };
+  enhancedAdvice: {
+    introduction: string;
+    emotionalSupport: string;
+    actionSteps: string[];
+    monitoringAdvice: string;
+    reassurance: string;
+  };
+  confidenceScore: number;
+}
+
 // Add header to PDF
 function addHeader(pdf: jsPDF, title: string) {
   let yPosition = 20;
@@ -539,3 +571,316 @@ export function generateVoiceReport(data: ChatConsultationReport): void {
   addDisclaimer(pdf, yPosition);
   pdf.save(`voice_consultation_${new Date().getTime()}.pdf`);
 }
+
+// Generate Symptom Checker Report
+export function generateSymptomCheckerReport(data: SymptomCheckerReport) {
+  const pdf = new jsPDF();
+  
+  addHeader(pdf, 'Symptom Analysis Report');
+  let yPosition = 60;
+  yPosition = addPatientInfo(pdf, data.user, data.date, yPosition);
+  
+  // Selected Symptoms Section
+  yPosition += 5;
+  pdf.setFontSize(14);
+  pdf.setFont('helvetica', 'bold');
+  pdf.setTextColor(20, 184, 166);
+  pdf.text('Selected Symptoms', 20, yPosition);
+  yPosition += 8;
+  
+  pdf.setFontSize(10);
+  pdf.setFont('helvetica', 'normal');
+  pdf.setTextColor(0, 0, 0);
+  const symptomsText = data.selectedSymptoms.join(', ');
+  const wrappedSymptoms = pdf.splitTextToSize(symptomsText, 170);
+  pdf.text(wrappedSymptoms, 20, yPosition);
+  yPosition += wrappedSymptoms.length * 5 + 10;
+  
+  // BERT Analysis Section
+  if (yPosition > 240) {
+    pdf.addPage();
+    yPosition = 20;
+  }
+  
+  pdf.setFontSize(14);
+  pdf.setFont('helvetica', 'bold');
+  pdf.setTextColor(147, 51, 234); // Purple color
+  pdf.text('🧠 AI-Powered Contextual Analysis', 20, yPosition);
+  yPosition += 8;
+  
+  // Create box for BERT analysis
+  pdf.setDrawColor(147, 51, 234);
+  pdf.setFillColor(250, 245, 255);
+  pdf.roundedRect(20, yPosition - 3, 170, 45, 2, 2, 'FD');
+  
+  pdf.setFontSize(10);
+  pdf.setFont('helvetica', 'bold');
+  pdf.setTextColor(0, 0, 0);
+  
+  // Emotional Tone
+  const emotionalColor = 
+    data.bertAnalysis.emotionalTone === 'urgent' ? [220, 38, 38] :
+    data.bertAnalysis.emotionalTone === 'anxious' ? [249, 115, 22] :
+    data.bertAnalysis.emotionalTone === 'concerned' ? [234, 179, 8] :
+    [34, 197, 94];
+  
+  pdf.text('Emotional Tone:', 25, yPosition + 5);
+  pdf.setTextColor(emotionalColor[0], emotionalColor[1], emotionalColor[2]);
+  pdf.text(data.bertAnalysis.emotionalTone.toUpperCase(), 70, yPosition + 5);
+  
+  // Urgency Level
+  pdf.setTextColor(0, 0, 0);
+  pdf.text('Urgency Level:', 25, yPosition + 12);
+  pdf.setTextColor(emotionalColor[0], emotionalColor[1], emotionalColor[2]);
+  pdf.text(data.bertAnalysis.urgencyLevel.toUpperCase(), 70, yPosition + 12);
+  
+  // Severity Score
+  pdf.setTextColor(0, 0, 0);
+  pdf.text('Severity Score:', 25, yPosition + 19);
+  pdf.text(`${data.bertAnalysis.severityScore}/10`, 70, yPosition + 19);
+  
+  // Confidence
+  pdf.text('Confidence:', 25, yPosition + 26);
+  pdf.setTextColor(147, 51, 234);
+  pdf.text(`${data.confidenceScore}%`, 70, yPosition + 26);
+  
+  // Contextual Insights
+  if (data.bertAnalysis.contextualInsights.length > 0) {
+    pdf.setTextColor(0, 0, 0);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Contextual Insights:', 25, yPosition + 33);
+    yPosition += 38;
+    
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(9);
+    data.bertAnalysis.contextualInsights.forEach((insight, idx) => {
+      if (yPosition > 270) {
+        pdf.addPage();
+        yPosition = 20;
+      }
+      const wrappedInsight = pdf.splitTextToSize(`✓ ${insight}`, 165);
+      pdf.text(wrappedInsight, 25, yPosition);
+      yPosition += wrappedInsight.length * 4 + 3;
+    });
+  } else {
+    yPosition += 45;
+  }
+  
+  yPosition += 5;
+  
+  // Personalized Guidance Section
+  if (yPosition > 220) {
+    pdf.addPage();
+    yPosition = 20;
+  }
+  
+  pdf.setFontSize(14);
+  pdf.setFont('helvetica', 'bold');
+  pdf.setTextColor(236, 72, 153); // Pink color
+  pdf.text('❤️ Personalized Guidance', 20, yPosition);
+  yPosition += 8;
+  
+  pdf.setDrawColor(236, 72, 153);
+  pdf.setFillColor(255, 245, 250);
+  
+  // Introduction
+  pdf.setFontSize(10);
+  pdf.setFont('helvetica', 'normal');
+  pdf.setTextColor(0, 0, 0);
+  const wrappedIntro = pdf.splitTextToSize(data.enhancedAdvice.introduction, 165);
+  const introHeight = wrappedIntro.length * 5 + 8;
+  pdf.roundedRect(20, yPosition - 3, 170, introHeight, 2, 2, 'FD');
+  pdf.text(wrappedIntro, 25, yPosition + 2);
+  yPosition += introHeight + 5;
+  
+  // Emotional Support
+  if (yPosition > 260) {
+    pdf.addPage();
+    yPosition = 20;
+  }
+  
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Emotional Support:', 25, yPosition);
+  yPosition += 5;
+  
+  pdf.setFont('helvetica', 'normal');
+  const wrappedSupport = pdf.splitTextToSize(data.enhancedAdvice.emotionalSupport, 165);
+  const supportHeight = wrappedSupport.length * 5 + 8;
+  pdf.roundedRect(20, yPosition - 3, 170, supportHeight, 2, 2, 'FD');
+  pdf.text(wrappedSupport, 25, yPosition + 2);
+  yPosition += supportHeight + 5;
+  
+  // Action Steps
+  if (yPosition > 240) {
+    pdf.addPage();
+    yPosition = 20;
+  }
+  
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Recommended Actions:', 25, yPosition);
+  yPosition += 7;
+  
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(9);
+  data.enhancedAdvice.actionSteps.forEach((step, idx) => {
+    if (yPosition > 270) {
+      pdf.addPage();
+      yPosition = 20;
+    }
+    const wrappedStep = pdf.splitTextToSize(`• ${step}`, 165);
+    pdf.text(wrappedStep, 25, yPosition);
+    yPosition += wrappedStep.length * 4 + 3;
+  });
+  
+  yPosition += 5;
+  
+  // Monitoring Advice
+  if (yPosition > 260) {
+    pdf.addPage();
+    yPosition = 20;
+  }
+  
+  pdf.setFontSize(10);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Monitoring:', 25, yPosition);
+  yPosition += 5;
+  
+  pdf.setFont('helvetica', 'normal');
+  const wrappedMonitoring = pdf.splitTextToSize(data.enhancedAdvice.monitoringAdvice, 165);
+  const monitoringHeight = wrappedMonitoring.length * 5 + 8;
+  pdf.roundedRect(20, yPosition - 3, 170, monitoringHeight, 2, 2, 'FD');
+  pdf.text(wrappedMonitoring, 25, yPosition + 2);
+  yPosition += monitoringHeight + 10;
+  
+  // Reassurance
+  if (yPosition > 260) {
+    pdf.addPage();
+    yPosition = 20;
+  }
+  
+  pdf.setDrawColor(236, 72, 153);
+  pdf.setFillColor(252, 231, 243);
+  const reassuranceHeight = pdf.splitTextToSize(data.enhancedAdvice.reassurance, 165).length * 5 + 8;
+  pdf.roundedRect(20, yPosition - 3, 170, reassuranceHeight, 2, 2, 'FD');
+  pdf.setFont('helvetica', 'bold');
+  const wrappedReassurance = pdf.splitTextToSize(data.enhancedAdvice.reassurance, 165);
+  pdf.text(wrappedReassurance, 25, yPosition + 2);
+  yPosition += reassuranceHeight + 10;
+  
+  // Detected Diseases Section
+  if (data.detectedDiseases.length > 0) {
+    if (yPosition > 230) {
+      pdf.addPage();
+      yPosition = 20;
+    }
+    
+    pdf.setFontSize(14);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(20, 184, 166);
+    pdf.text('Detected Conditions', 20, yPosition);
+    yPosition += 8;
+    
+    data.detectedDiseases.forEach((disease, idx) => {
+      if (yPosition > 250) {
+        pdf.addPage();
+        yPosition = 20;
+      }
+      
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(0, 0, 0);
+      pdf.text(`${idx + 1}. ${disease.name}`, 20, yPosition);
+      yPosition += 6;
+      
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(`Severity: ${disease.severity}`, 25, yPosition);
+      yPosition += 8;
+      
+      // Medicines
+      if (disease.medicines && disease.medicines.length > 0) {
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(245, 158, 11);
+        pdf.text('💊 Recommended Medicines:', 25, yPosition);
+        yPosition += 6;
+        
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(0, 0, 0);
+        pdf.setFontSize(9);
+        disease.medicines.forEach((med) => {
+          if (yPosition > 270) {
+            pdf.addPage();
+            yPosition = 20;
+          }
+          pdf.text(`• ${med.name}`, 30, yPosition);
+          yPosition += 4;
+          pdf.text(`  Dosage: ${med.dosage} | Frequency: ${med.frequency} | Duration: ${med.duration}`, 32, yPosition);
+          yPosition += 6;
+        });
+        yPosition += 3;
+      }
+      
+      // Home Remedies
+      if (disease.homeRemedies && disease.homeRemedies.length > 0) {
+        if (yPosition > 260) {
+          pdf.addPage();
+          yPosition = 20;
+        }
+        
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(34, 197, 94);
+        pdf.text('🌿 Home Remedies:', 25, yPosition);
+        yPosition += 6;
+        
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(0, 0, 0);
+        pdf.setFontSize(9);
+        disease.homeRemedies.forEach((remedy) => {
+          if (yPosition > 270) {
+            pdf.addPage();
+            yPosition = 20;
+          }
+          const wrappedRemedy = pdf.splitTextToSize(`• ${remedy}`, 160);
+          pdf.text(wrappedRemedy, 30, yPosition);
+          yPosition += wrappedRemedy.length * 4 + 2;
+        });
+        yPosition += 3;
+      }
+      
+      // Red Flags
+      if (disease.redFlags && disease.redFlags.length > 0) {
+        if (yPosition > 260) {
+          pdf.addPage();
+          yPosition = 20;
+        }
+        
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(220, 38, 38);
+        pdf.text('⚠️ Red Flags - Seek Emergency Help If:', 25, yPosition);
+        yPosition += 6;
+        
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(0, 0, 0);
+        pdf.setFontSize(9);
+        disease.redFlags.forEach((flag) => {
+          if (yPosition > 270) {
+            pdf.addPage();
+            yPosition = 20;
+          }
+          const wrappedFlag = pdf.splitTextToSize(`! ${flag}`, 160);
+          pdf.text(wrappedFlag, 30, yPosition);
+          yPosition += wrappedFlag.length * 4 + 2;
+        });
+        yPosition += 5;
+      }
+      
+      yPosition += 5;
+    });
+  }
+  
+  addDisclaimer(pdf, yPosition);
+  pdf.save(`symptom_analysis_${new Date().getTime()}.pdf`);
+}
+

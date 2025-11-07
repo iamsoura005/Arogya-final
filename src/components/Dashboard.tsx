@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { LogOut, Plus, Calendar, FileText, MessageSquare, Mic, Image, AlertCircle, TrendingUp, Download, BarChart3 } from 'lucide-react';
+import { LogOut, Plus, Calendar, FileText, MessageSquare, Mic, Image, AlertCircle, TrendingUp, Download, BarChart3, Activity } from 'lucide-react';
 import { useState } from 'react';
 import PrescriptionModal from './PrescriptionModal';
 
@@ -10,9 +10,10 @@ interface DashboardProps {
   onStartConsultation: () => void;
   onViewBenchmarking: () => void;
   onViewModelComparison: () => void;
+  onViewPersonalDashboard?: () => void;
 }
 
-export default function Dashboard({ user, consultations, onLogout, onStartConsultation, onViewBenchmarking, onViewModelComparison }: DashboardProps) {
+export default function Dashboard({ user, consultations, onLogout, onStartConsultation, onViewBenchmarking, onViewModelComparison, onViewPersonalDashboard }: DashboardProps) {
   const [showPrescription, setShowPrescription] = useState(false);
 
   const containerVariants = {
@@ -182,17 +183,29 @@ export default function Dashboard({ user, consultations, onLogout, onStartConsul
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.25 }}
-          className="mb-8"
+          className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto"
         >
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setShowPrescription(true)}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors flex items-center justify-center space-x-2 w-full max-w-md mx-auto"
+            className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors flex items-center justify-center space-x-2"
           >
             <Download className="w-5 h-5" />
             <span>Download Prescription</span>
           </motion.button>
+          
+          {onViewPersonalDashboard && (
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={onViewPersonalDashboard}
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors flex items-center justify-center space-x-2"
+            >
+              <Activity className="w-5 h-5" />
+              <span>Health Dashboard</span>
+            </motion.button>
+          )}
         </motion.div>
 
         {/* Disclaimer Banner */}

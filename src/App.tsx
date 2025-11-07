@@ -6,9 +6,10 @@ import Dashboard from './components/Dashboard';
 import ConsultationInterface from './components/ConsultationInterface';
 import BenchmarkingDashboard from './components/BenchmarkingDashboard/BenchmarkingDashboard';
 import ModelComparisonDashboardV2 from './components/ModelComparison/ModelComparisonDashboardV2';
+import PersonalDashboard from './components/PersonalDashboard';
 import { AuthContext, User } from './context/AuthContext';
 
-type Page = 'landing' | 'login' | 'dashboard' | 'consultation' | 'benchmarking' | 'model-comparison';
+type Page = 'landing' | 'login' | 'dashboard' | 'consultation' | 'benchmarking' | 'model-comparison' | 'personal-dashboard';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('landing');
@@ -130,6 +131,7 @@ function App() {
               onStartConsultation={handleStartConsultation}
               onViewBenchmarking={() => setCurrentPage('benchmarking')}
               onViewModelComparison={() => setCurrentPage('model-comparison')}
+              onViewPersonalDashboard={() => setCurrentPage('personal-dashboard')}
             />
           )}
           {currentPage === 'consultation' && user && (
@@ -148,6 +150,9 @@ function App() {
             <ModelComparisonDashboardV2
               onBack={() => setCurrentPage('dashboard')}
             />
+          )}
+          {currentPage === 'personal-dashboard' && user && (
+            <PersonalDashboard onBack={() => setCurrentPage('dashboard')} />
           )}
         </motion.div>
       </div>
