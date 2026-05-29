@@ -1,0 +1,124 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply scroll-smooth;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  
+  body {
+    @apply bg-slate-950 text-slate-100 min-h-screen selection:bg-teal-500/30 selection:text-teal-200;
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(20, 184, 166, 0.08) 0px, transparent 50%),
+      radial-gradient(at 50% 0%, rgba(99, 102, 241, 0.05) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(22, 163, 74, 0.05) 0px, transparent 50%);
+    background-attachment: fixed;
+  }
+}
+
+@layer components {
+  /* Premium Glassmorphic Card */
+  .glass-card {
+    @apply bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-6 shadow-2xl shadow-teal-950/10 transition-all duration-300;
+  }
+
+  .glass-card-hover {
+    @apply hover:border-teal-500/30 hover:bg-slate-900/80 hover:shadow-teal-500/5 hover:-translate-y-0.5;
+  }
+
+  /* Sleek Premium Buttons */
+  .btn-premium-primary {
+    @apply relative px-5 py-2.5 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-slate-950 rounded-xl font-semibold shadow-lg shadow-teal-500/20 hover:shadow-teal-400/30 transition-all duration-200 active:scale-95 flex items-center justify-center gap-2;
+  }
+
+  .btn-premium-secondary {
+    @apply px-5 py-2.5 bg-slate-900/80 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-200 rounded-xl font-medium backdrop-blur-md transition-all duration-200 active:scale-95 flex items-center justify-center gap-2;
+  }
+
+  .btn-premium-accent {
+    @apply px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 rounded-xl font-semibold shadow-lg shadow-orange-500/20 transition-all duration-200 active:scale-95 flex items-center justify-center gap-2;
+  }
+
+  .btn-premium-danger {
+    @apply px-5 py-2.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white rounded-xl font-semibold shadow-lg shadow-red-600/20 transition-all duration-200 active:scale-95 flex items-center justify-center gap-2;
+  }
+
+  /* Form Input Styling */
+  .premium-input {
+    @apply w-full bg-slate-900/50 border border-slate-800 hover:border-slate-700 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none transition-all duration-200 backdrop-blur-sm;
+  }
+
+  /* Text Gradation */
+  .text-glow-gradient {
+    @apply bg-gradient-to-r from-teal-300 via-emerald-300 to-indigo-300 bg-clip-text text-transparent;
+  }
+
+  /* Heartbeat / Pulse ring */
+  .pulse-glow {
+    animation: pulseGlow 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Waveform animation for voice */
+  .voice-bar {
+    animation: voiceWave 1.2s ease-in-out infinite;
+  }
+}
+
+/* Custom Keyframes */
+@keyframes pulseGlow {
+  0%, 100% {
+    transform: scale(0.98);
+    box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.4);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 20px 4px rgba(20, 184, 166, 0.15);
+  }
+}
+
+@keyframes voiceWave {
+  0%, 100% {
+    transform: scaleY(0.3);
+  }
+  50% {
+    transform: scaleY(1.2);
+  }
+}
+
+/* Background Grid Overlay */
+.bg-grid-overlay {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-slate-950;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-800 hover:bg-slate-700 rounded-full;
+}
+
+/* Backward compatibility for original tailwind styles */
+.btn-primary { @apply btn-premium-primary; }
+.btn-secondary { @apply btn-premium-secondary; }
+.btn-accent { @apply btn-premium-accent; }
+.btn-outline { @apply btn-premium-secondary; }
+.card { @apply glass-card; }
+.input-field { @apply premium-input; }
+.chat-message { @apply p-4 rounded-2xl mb-4 backdrop-blur-md border border-slate-800/80; }
+.chat-message-user { @apply bg-teal-500/20 text-teal-100 border-teal-500/30 ml-auto max-w-lg; }
+.chat-message-bot { @apply bg-slate-900/80 text-slate-100 mr-auto max-w-lg; }
+.medical-card { @apply border-l-4 border-teal-500 bg-teal-950/20; }
+.disclaimer-banner { @apply border-l-4 border-amber-500/50 bg-amber-950/10 text-amber-200 p-4; }
+.waveform-bar { @apply voice-bar; }

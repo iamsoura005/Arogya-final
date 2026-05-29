@@ -1,0 +1,97 @@
+{
+  "model_type": "tabular_neural_network",
+  "dataset_info": {
+    "name": "Erythemato-Squamous Diseases",
+    "num_samples": 366,
+    "num_features": 34,
+    "feature_names": [
+      "erythema",
+      "scaling",
+      "definite_borders",
+      "itching",
+      "koebner_phenomenon",
+      "polygonal_papules",
+      "follicular_papules",
+      "oral_mucosal_involvement",
+      "knee_elbow_involvement",
+      "scalp_involvement",
+      "family_history",
+      "age",
+      "melanin_incontinence",
+      "eosinophils_infiltrate",
+      "pnl_infiltrate",
+      "fibrosis_papillary_dermis",
+      "exocytosis",
+      "acanthosis",
+      "hyperkeratosis",
+      "parakeratosis",
+      "clubbing_rete_ridges",
+      "elongation_rete_ridges",
+      "thinning_suprapapillary_epidermis",
+      "spongiform_pustule",
+      "munro_microabscess",
+      "focal_hypergranulosis",
+      "disappearance_granular_layer",
+      "vacuolisation_damage_basal_layer",
+      "spongiosis",
+      "saw_tooth_appearance_retes",
+      "follicular_horn_plug",
+      "perifollicular_parakeratosis",
+      "inflammatory_monoluclear_infiltrate",
+      "band_like_infiltrate"
+    ],
+    "num_classes": 6,
+    "class_names": [
+      "psoriasis",
+      "seborreic_dermatitis",
+      "lichen_planus",
+      "pityriasis_rosea",
+      "chronic_dermatitis",
+      "pityriasis_rubra_pilaris"
+    ],
+    "class_distribution": {
+      "1": 112,
+      "2": 61,
+      "3": 72,
+      "4": 49,
+      "5": 52,
+      "6": 20
+    }
+  },
+  "model_architecture": {
+    "input_dim": 34,
+    "hidden_layers": [
+      128,
+      64,
+      32
+    ],
+    "output_dim": 6,
+    "activation": "relu",
+    "dropout_rates": [
+      0.3,
+      0.3,
+      0.2
+    ],
+    "total_parameters": 15910
+  },
+  "preprocessing": {
+    "scaling": "StandardScaler",
+    "label_encoding": "LabelEncoder",
+    "missing_value_handling": "mean_imputation"
+  },
+  "training_info": {
+    "test_accuracy": 0.9594594836235046,
+    "test_loss": 0.1015649065375328,
+    "epochs_trained": 65,
+    "early_stopping_used": true,
+    "learning_rate_reduction_used": true
+  },
+  "label_encoder_classes": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+  ]
+}
