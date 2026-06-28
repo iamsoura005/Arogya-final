@@ -19,6 +19,7 @@ import FamilyHealthHub from './components/FamilyHealthHub';
 import { AuthContext, User } from './context/AuthContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import LanguageSelector from './components/LanguageSelector';
+import Sidebar from './components/Sidebar';
 
 type Page = 'landing' | 'login' | 'dashboard' | 'consultation' | 'benchmarking' | 'model-comparison' | 'personal-dashboard' | 'appointments' | 'medications' | 'emergency' | 'compliance' | 'health-cards' | 'export' | 'analytics' | 'lab-reports' | 'family-hub';
 
@@ -118,108 +119,127 @@ function App() {
     setCurrentPage('dashboard');
   };
 
+  const showSidebar = user && currentPage !== 'landing' && currentPage !== 'login';
+
   return (
     <LanguageProvider>
       <AuthContext.Provider value={{ user, setUser }}>
-        <div className="min-h-screen bg-gray-50">
-          {/* Language Selector - Show on all pages except landing */}
+        <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col lg:flex-row bg-grid-overlay relative">
+          
+          {/* Navigation Sidebar */}
+          {showSidebar && (
+            <Sidebar
+              activePage={currentPage as any}
+              setActivePage={(page) => setCurrentPage(page as any)}
+              onLogout={handleLogout}
+              user={user}
+            />
+          )}
+
+          {/* Language Selector */}
           {currentPage !== 'landing' && (
             <div className="fixed top-4 right-4 z-50">
               <LanguageSelector />
             </div>
           )}
           
-          <motion.div
-            key={currentPage}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          {currentPage === 'landing' && (
-            <LandingPage onGetStarted={() => setCurrentPage('login')} />
-          )}
-          {currentPage === 'login' && (
-            <LoginPage onLogin={handleLogin} onBackToLanding={() => setCurrentPage('landing')} />
-          )}
-          {currentPage === 'dashboard' && user && (
-            <Dashboard
-              user={user}
-              consultations={consultations}
-              onLogout={handleLogout}
-              onStartConsultation={handleStartConsultation}
-              onViewBenchmarking={() => setCurrentPage('benchmarking')}
-              onViewModelComparison={() => setCurrentPage('model-comparison')}
-              onViewPersonalDashboard={() => setCurrentPage('personal-dashboard')}
-              onViewAppointments={() => setCurrentPage('appointments')}
-              onViewMedications={() => setCurrentPage('medications')}
-              onViewEmergency={() => setCurrentPage('emergency')}
-              onViewCompliance={() => setCurrentPage('compliance')}
-              onViewHealthCards={() => setCurrentPage('health-cards')}
-              onViewExport={() => setCurrentPage('export')}
-              onViewAnalytics={() => setCurrentPage('analytics')}
-              onViewLabReports={() => setCurrentPage('lab-reports')}
-              onViewFamilyHub={() => setCurrentPage('family-hub')}
-            />
-          )}
-          {currentPage === 'consultation' && user && (
-            <ConsultationInterface
-              user={user}
-              onEndConsultation={handleEndConsultation}
-              onBack={() => setCurrentPage('dashboard')}
-            />
-          )}
-          {currentPage === 'benchmarking' && user && (
-            <BenchmarkingDashboard
-              onBack={() => setCurrentPage('dashboard')}
-            />
-          )}
-          {currentPage === 'model-comparison' && user && (
-            <ModelComparisonDashboardV2
-              onBack={() => setCurrentPage('dashboard')}
-            />
-          )}
-          {currentPage === 'personal-dashboard' && user && (
-            <PersonalDashboard onBack={() => setCurrentPage('dashboard')} />
-          )}
-          {currentPage === 'appointments' && user && (
-            <AppointmentScheduler
-              userId={user.id}
-              userName={user.name}
-              userEmail={user.email}
-              onBack={() => setCurrentPage('dashboard')}
-            />
-          )}
-          {currentPage === 'medications' && user && (
-            <MedicationTracker 
-              userId={user.id} 
-              onBack={() => setCurrentPage('dashboard')}
-            />
-          )}
-          {currentPage === 'emergency' && user && (
-            <EmergencyResponse onBack={() => setCurrentPage('dashboard')} />
-          )}
-          {currentPage === 'compliance' && user && (
-            <ComplianceSettings onBack={() => setCurrentPage('dashboard')} />
-          )}
-          {currentPage === 'health-cards' && user && (
-            <HealthCardGenerator onBack={() => setCurrentPage('dashboard')} />
-          )}
-          {currentPage === 'export' && user && (
-            <ExportSettings onBack={() => setCurrentPage('dashboard')} />
-          )}
-          {currentPage === 'analytics' && user && (
-            <HealthAnalyticsDashboard onBack={() => setCurrentPage('dashboard')} />
-          )}
-          {currentPage === 'lab-reports' && user && (
-            <LabReportAnalyzer onBack={() => setCurrentPage('dashboard')} />
-          )}
-          {currentPage === 'family-hub' && user && (
-            <FamilyHealthHub onBack={() => setCurrentPage('dashboard')} />
-          )}
-        </motion.div>
-      </div>
-    </AuthContext.Provider>
+          {/* Main Content Area */}
+          <div className={`flex-1 flex flex-col min-w-0 ${showSidebar ? 'pt-16 lg:pt-0' : ''}`}>
+            <main className={`flex-grow ${showSidebar ? 'p-6 lg:p-8' : ''}`}>
+              <motion.div
+                key={currentPage}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+                className="h-full"
+              >
+                {currentPage === 'landing' && (
+                  <LandingPage onGetStarted={() => setCurrentPage('login')} />
+                )}
+                {currentPage === 'login' && (
+                  <LoginPage onLogin={handleLogin} onBackToLanding={() => setCurrentPage('landing')} />
+                )}
+                {currentPage === 'dashboard' && user && (
+                  <Dashboard
+                    user={user}
+                    consultations={consultations}
+                    onLogout={handleLogout}
+                    onStartConsultation={handleStartConsultation}
+                    onViewBenchmarking={() => setCurrentPage('benchmarking')}
+                    onViewModelComparison={() => setCurrentPage('model-comparison')}
+                    onViewPersonalDashboard={() => setCurrentPage('personal-dashboard')}
+                    onViewAppointments={() => setCurrentPage('appointments')}
+                    onViewMedications={() => setCurrentPage('medications')}
+                    onViewEmergency={() => setCurrentPage('emergency')}
+                    onViewCompliance={() => setCurrentPage('compliance')}
+                    onViewHealthCards={() => setCurrentPage('health-cards')}
+                    onViewExport={() => setCurrentPage('export')}
+                    onViewAnalytics={() => setCurrentPage('analytics')}
+                    onViewLabReports={() => setCurrentPage('lab-reports')}
+                    onViewFamilyHub={() => setCurrentPage('family-hub')}
+                  />
+                )}
+                {currentPage === 'consultation' && user && (
+                  <ConsultationInterface
+                    user={user}
+                    onEndConsultation={handleEndConsultation}
+                    onBack={() => setCurrentPage('dashboard')}
+                  />
+                )}
+                {currentPage === 'benchmarking' && user && (
+                  <BenchmarkingDashboard
+                    onBack={() => setCurrentPage('dashboard')}
+                  />
+                )}
+                {currentPage === 'model-comparison' && user && (
+                  <ModelComparisonDashboardV2
+                    onBack={() => setCurrentPage('dashboard')}
+                  />
+                )}
+                {currentPage === 'personal-dashboard' && user && (
+                  <PersonalDashboard onBack={() => setCurrentPage('dashboard')} />
+                )}
+                {currentPage === 'appointments' && user && (
+                  <AppointmentScheduler
+                    userId={user.id}
+                    userName={user.name}
+                    userEmail={user.email}
+                    onBack={() => setCurrentPage('dashboard')}
+                  />
+                )}
+                {currentPage === 'medications' && user && (
+                  <MedicationTracker 
+                    userId={user.id} 
+                    onBack={() => setCurrentPage('dashboard')}
+                  />
+                )}
+                {currentPage === 'emergency' && user && (
+                  <EmergencyResponse onBack={() => setCurrentPage('dashboard')} />
+                )}
+                {currentPage === 'compliance' && user && (
+                  <ComplianceSettings onBack={() => setCurrentPage('dashboard')} />
+                )}
+                {currentPage === 'health-cards' && user && (
+                  <HealthCardGenerator onBack={() => setCurrentPage('dashboard')} />
+                )}
+                {currentPage === 'export' && user && (
+                  <ExportSettings onBack={() => setCurrentPage('dashboard')} />
+                )}
+                {currentPage === 'analytics' && user && (
+                  <HealthAnalyticsDashboard onBack={() => setCurrentPage('dashboard')} />
+                )}
+                {currentPage === 'lab-reports' && user && (
+                  <LabReportAnalyzer onBack={() => setCurrentPage('dashboard')} />
+                )}
+                {currentPage === 'family-hub' && user && (
+                  <FamilyHealthHub onBack={() => setCurrentPage('dashboard')} />
+                )}
+              </motion.div>
+            </main>
+          </div>
+        </div>
+      </AuthContext.Provider>
     </LanguageProvider>
   );
 }
